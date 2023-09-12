@@ -1,0 +1,296 @@
+From 6490575f11fb9e66610b14679404aeb5ad12fcda Mon Sep 17 00:00:00 2001
+From: "Avi Digmi (from Dev Box)" <avdigmi@microsoft.com>
+Date: Tue, 12 Sep 2023 12:11:13 +0300
+Subject: [PATCH] diff
+
+---
+ src/excalidraw-app/components/AppMainMenu.tsx |   7 --
+ .../components/AppWelcomeScreen.tsx           |   9 --
+ .../components/ExportToExcalidrawPlus.tsx     | 110 ------------------
+ src/excalidraw-app/index.tsx                  |  32 +----
+ .../__snapshots__/MobileMenu.test.tsx.snap    |  57 ---------
+ 5 files changed, 1 insertion(+), 214 deletions(-)
+ delete mode 100644 src/excalidraw-app/components/ExportToExcalidrawPlus.tsx
+
+diff --git a/src/excalidraw-app/components/AppMainMenu.tsx b/src/excalidraw-app/components/AppMainMenu.tsx
+index 7b562f8b..4fa4bfe0 100644
+--- a/src/excalidraw-app/components/AppMainMenu.tsx
++++ b/src/excalidraw-app/components/AppMainMenu.tsx
+@@ -24,13 +24,6 @@ export const AppMainMenu: React.FC<{
+       <MainMenu.DefaultItems.Help />
+       <MainMenu.DefaultItems.ClearCanvas />
+       <MainMenu.Separator />
+-      <MainMenu.ItemLink
+-        icon={PlusPromoIcon}
+-        href="https://plus.excalidraw.com/plus?utm_source=excalidraw&utm_medium=app&utm_content=hamburger"
+-        className="ExcalidrawPlus"
+-      >
+-        Excalidraw+
+-      </MainMenu.ItemLink>
+       <MainMenu.DefaultItems.Socials />
+       <MainMenu.Separator />
+       <MainMenu.DefaultItems.ToggleTheme />
+diff --git a/src/excalidraw-app/components/AppWelcomeScreen.tsx b/src/excalidraw-app/components/AppWelcomeScreen.tsx
+index 2dff7d27..cc3d63a1 100644
+--- a/src/excalidraw-app/components/AppWelcomeScreen.tsx
++++ b/src/excalidraw-app/components/AppWelcomeScreen.tsx
+@@ -54,15 +54,6 @@ export const AppWelcomeScreen: React.FC<{
+               onSelect={() => props.setCollabDialogShown(true)}
+             />
+           )}
+-          {!isExcalidrawPlusSignedUser && (
+-            <WelcomeScreen.Center.MenuItemLink
+-              href="https://plus.excalidraw.com/plus?utm_source=excalidraw&utm_medium=app&utm_content=welcomeScreenGuest"
+-              shortcut={null}
+-              icon={PlusPromoIcon}
+-            >
+-              Try Excalidraw Plus!
+-            </WelcomeScreen.Center.MenuItemLink>
+-          )}
+         </WelcomeScreen.Center.Menu>
+       </WelcomeScreen.Center>
+     </WelcomeScreen>
+diff --git a/src/excalidraw-app/components/ExportToExcalidrawPlus.tsx b/src/excalidraw-app/components/ExportToExcalidrawPlus.tsx
+deleted file mode 100644
+index 8e6342d3..00000000
+--- a/src/excalidraw-app/components/ExportToExcalidrawPlus.tsx
++++ /dev/null
+@@ -1,110 +0,0 @@
+-import React from "react";
+-import { Card } from "../../components/Card";
+-import { ToolButton } from "../../components/ToolButton";
+-import { serializeAsJSON } from "../../data/json";
+-import { loadFirebaseStorage, saveFilesToFirebase } from "../data/firebase";
+-import { FileId, NonDeletedExcalidrawElement } from "../../element/types";
+-import { AppState, BinaryFileData, BinaryFiles } from "../../types";
+-import { nanoid } from "nanoid";
+-import { useI18n } from "../../i18n";
+-import { excalidrawPlusIcon } from "./icons";
+-import { encryptData, generateEncryptionKey } from "../../data/encryption";
+-import { isInitializedImageElement } from "../../element/typeChecks";
+-import { FILE_UPLOAD_MAX_BYTES } from "../app_constants";
+-import { encodeFilesForUpload } from "../data/FileManager";
+-import { MIME_TYPES } from "../../constants";
+-import { trackEvent } from "../../analytics";
+-import { getFrame } from "../../utils";
+-
+-export const exportToExcalidrawPlus = async (
+-  elements: readonly NonDeletedExcalidrawElement[],
+-  appState: Partial<AppState>,
+-  files: BinaryFiles,
+-) => {
+-  const firebase = await loadFirebaseStorage();
+-
+-  const id = `${nanoid(12)}`;
+-
+-  const encryptionKey = (await generateEncryptionKey())!;
+-  const encryptedData = await encryptData(
+-    encryptionKey,
+-    serializeAsJSON(elements, appState, files, "database"),
+-  );
+-
+-  const blob = new Blob(
+-    [encryptedData.iv, new Uint8Array(encryptedData.encryptedBuffer)],
+-    {
+-      type: MIME_TYPES.binary,
+-    },
+-  );
+-
+-  await firebase
+-    .storage()
+-    .ref(`/migrations/scenes/${id}`)
+-    .put(blob, {
+-      customMetadata: {
+-        data: JSON.stringify({ version: 2, name: appState.name }),
+-        created: Date.now().toString(),
+-      },
+-    });
+-
+-  const filesMap = new Map<FileId, BinaryFileData>();
+-  for (const element of elements) {
+-    if (isInitializedImageElement(element) && files[element.fileId]) {
+-      filesMap.set(element.fileId, files[element.fileId]);
+-    }
+-  }
+-
+-  if (filesMap.size) {
+-    const filesToUpload = await encodeFilesForUpload({
+-      files: filesMap,
+-      encryptionKey,
+-      maxBytes: FILE_UPLOAD_MAX_BYTES,
+-    });
+-
+-    await saveFilesToFirebase({
+-      prefix: `/migrations/files/scenes/${id}`,
+-      files: filesToUpload,
+-    });
+-  }
+-
+-  window.open(
+-    `https://plus.excalidraw.com/import?excalidraw=${id},${encryptionKey}`,
+-  );
+-};
+-
+-export const ExportToExcalidrawPlus: React.FC<{
+-  elements: readonly NonDeletedExcalidrawElement[];
+-  appState: Partial<AppState>;
+-  files: BinaryFiles;
+-  onError: (error: Error) => void;
+-}> = ({ elements, appState, files, onError }) => {
+-  const { t } = useI18n();
+-  return (
+-    <Card color="primary">
+-      <div className="Card-icon">{excalidrawPlusIcon}</div>
+-      <h2>Excalidraw+</h2>
+-      <div className="Card-details">
+-        {t("exportDialog.excalidrawplus_description")}
+-      </div>
+-      <ToolButton
+-        className="Card-button"
+-        type="button"
+-        title={t("exportDialog.excalidrawplus_button")}
+-        aria-label={t("exportDialog.excalidrawplus_button")}
+-        showAriaLabel={true}
+-        onClick={async () => {
+-          try {
+-            trackEvent("export", "eplus", `ui (${getFrame()})`);
+-            await exportToExcalidrawPlus(elements, appState, files);
+-          } catch (error: any) {
+-            console.error(error);
+-            if (error.name !== "AbortError") {
+-              onError(new Error(t("exportDialog.excalidrawplus_exportError")));
+-            }
+-          }
+-        }}
+-      />
+-    </Card>
+-  );
+-};
+diff --git a/src/excalidraw-app/index.tsx b/src/excalidraw-app/index.tsx
+index 00bcd0cb..2e9d5e8d 100644
+--- a/src/excalidraw-app/index.tsx
++++ b/src/excalidraw-app/index.tsx
+@@ -69,10 +69,6 @@ import {
+ } from "./data/localStorage";
+ import CustomStats from "./CustomStats";
+ import { restore, restoreAppState, RestoredDataState } from "../data/restore";
+-import {
+-  ExportToExcalidrawPlus,
+-  exportToExcalidrawPlus,
+-} from "./components/ExportToExcalidrawPlus";
+ import { updateStaleImageStatuses } from "./data/FileManager";
+ import { newElementWith } from "../element/mutateElement";
+ import { isInitializedImageElement } from "../element/typeChecks";
+@@ -696,18 +692,7 @@ const ExcalidrawWrapper = () => {
+               onExportToBackend,
+               renderCustomUI: (elements, appState, files) => {
+                 return (
+-                  <ExportToExcalidrawPlus
+-                    elements={elements}
+-                    appState={appState}
+-                    files={files}
+-                    onError={(error) => {
+-                      excalidrawAPI?.updateScene({
+-                        appState: {
+-                          errorMessage: error.message,
+-                        },
+-                      });
+-                    }}
+-                  />
++                  <div/>
+                 );
+               },
+             },
+@@ -744,21 +729,6 @@ const ExcalidrawWrapper = () => {
+         <OverwriteConfirmDialog>
+           <OverwriteConfirmDialog.Actions.ExportToImage />
+           <OverwriteConfirmDialog.Actions.SaveToDisk />
+-          {excalidrawAPI && (
+-            <OverwriteConfirmDialog.Action
+-              title={t("overwriteConfirm.action.excalidrawPlus.title")}
+-              actionLabel={t("overwriteConfirm.action.excalidrawPlus.button")}
+-              onClick={() => {
+-                exportToExcalidrawPlus(
+-                  excalidrawAPI.getSceneElements(),
+-                  excalidrawAPI.getAppState(),
+-                  excalidrawAPI.getFiles(),
+-                );
+-              }}
+-            >
+-              {t("overwriteConfirm.action.excalidrawPlus.description")}
+-            </OverwriteConfirmDialog.Action>
+-          )}
+         </OverwriteConfirmDialog>
+         <AppFooter />
+         {isCollaborating && isOffline && (
+diff --git a/src/tests/__snapshots__/MobileMenu.test.tsx.snap b/src/tests/__snapshots__/MobileMenu.test.tsx.snap
+index d85989e6..416ebe24 100644
+--- a/src/tests/__snapshots__/MobileMenu.test.tsx.snap
++++ b/src/tests/__snapshots__/MobileMenu.test.tsx.snap
+@@ -178,63 +178,6 @@ exports[`Test MobileMenu > should initialize with welcome screen and hide once u
+         Live collaboration...
+       </div>
+     </button>
+-    <a
+-      class="welcome-screen-menu-item "
+-      href="https://plus.excalidraw.com/plus?utm_source=excalidraw&utm_medium=app&utm_content=welcomeScreenGuest"
+-      rel="noreferrer"
+-      target="_blank"
+-    >
+-      <div
+-        class="welcome-screen-menu-item__icon"
+-      >
+-        <svg
+-          aria-hidden="true"
+-          class=""
+-          fill="none"
+-          focusable="false"
+-          role="img"
+-          stroke="currentColor"
+-          stroke-linecap="round"
+-          stroke-linejoin="round"
+-          stroke-width="2"
+-          viewBox="0 0 24 24"
+-        >
+-          <g
+-            stroke-width="1.5"
+-          >
+-            <path
+-              d="M0 0h24v24H0z"
+-              fill="none"
+-              stroke="none"
+-            />
+-            <rect
+-              height="4"
+-              rx="1"
+-              width="18"
+-              x="3"
+-              y="8"
+-            />
+-            <line
+-              x1="12"
+-              x2="12"
+-              y1="8"
+-              y2="21"
+-            />
+-            <path
+-              d="M19 12v7a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-7"
+-            />
+-            <path
+-              d="M7.5 8a2.5 2.5 0 0 1 0 -5a4.8 8 0 0 1 4.5 5a4.8 8 0 0 1 4.5 -5a2.5 2.5 0 0 1 0 5"
+-            />
+-          </g>
+-        </svg>
+-      </div>
+-      <div
+-        class="welcome-screen-menu-item__text"
+-      >
+-        Try Excalidraw Plus!
+-      </div>
+-    </a>
+   </div>
+ </div>
+ `;
+-- 
+2.41.0.windows.3
+

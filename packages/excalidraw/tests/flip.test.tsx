@@ -18,7 +18,7 @@ import {
   FileId,
 } from "../element/types";
 import { newLinearElement } from "../element";
-import { Excalidraw } from "../index";
+import { Excalidraw } from "../packages/excalidraw/index";
 import { mutateElement } from "../element/mutateElement";
 import { NormalizedZoomValue } from "../types";
 import { ROUNDNESS } from "../constants";

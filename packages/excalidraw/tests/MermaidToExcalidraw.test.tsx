@@ -1,5 +1,5 @@
 import { act, fireEvent, render, waitFor } from "./test-utils";
-import { Excalidraw } from "../index";
+import { Excalidraw } from "../packages/excalidraw/index";
 import React from "react";
 import { expect, vi } from "vitest";
 import * as MermaidToExcalidraw from "@excalidraw/mermaid-to-excalidraw";
@@ -102,7 +102,7 @@ describe("Test <MermaidToExcalidraw/>", () => {
       <Excalidraw
         initialData={{
           appState: {
-            openDialog: { name: "ttd", tab: "mermaid" },
+            openDialog: "mermaid",
           },
         }}
       />,
@@ -110,16 +110,16 @@ describe("Test <MermaidToExcalidraw/>", () => {
   });
 
   it("should open mermaid popup when active tool is mermaid", async () => {
-    const dialog = document.querySelector(".ttd-dialog")!;
+    const dialog = document.querySelector(".dialog-mermaid")!;
     await waitFor(() => dialog.querySelector("canvas"));
     expect(dialog.outerHTML).toMatchSnapshot();
   });
 
   it("should close the popup and set the tool to selection when close button clicked", () => {
-    const dialog = document.querySelector(".ttd-dialog")!;
+    const dialog = document.querySelector(".dialog-mermaid")!;
     const closeBtn = dialog.querySelector(".Dialog__close")!;
     fireEvent.click(closeBtn);
-    expect(document.querySelector(".ttd-dialog")).toBe(null);
+    expect(document.querySelector(".dialog-mermaid")).toBe(null);
     expect(window.h.state.activeTool).toStrictEqual({
       customType: null,
       lastActiveTool: null,
@@ -129,12 +129,9 @@ describe("Test <MermaidToExcalidraw/>", () => {
   });
 
   it("should show error in preview when mermaid library throws error", async () => {
-    const dialog = document.querySelector(".ttd-dialog")!;
-
-    expect(dialog).not.toBeNull();
-
-    const selector = ".ttd-dialog-input";
-    let editor = await getTextEditor(selector, true);
+    const dialog = document.querySelector(".dialog-mermaid")!;
+    const selector = ".dialog-mermaid-panels-text textarea";
+    let editor = await getTextEditor(selector, false);
 
     expect(dialog.querySelector('[data-testid="mermaid-error"]')).toBeNull();
 
@@ -154,8 +151,17 @@ describe("Test <MermaidToExcalidraw/>", () => {
     editor = await getTextEditor(selector, false);
 
     expect(editor.textContent).toBe("flowchart TD1");
-    expect(
-      dialog.querySelector('[data-testid="mermaid-error"]'),
-    ).toMatchInlineSnapshot("null");
+    expect(dialog.querySelector('[data-testid="mermaid-error"]'))
+      .toMatchInlineSnapshot(`
+        <div
+          class="mermaid-error"
+          data-testid="mermaid-error"
+        >
+          Error! 
+          <p>
+            ERROR
+          </p>
+        </div>
+      `);
   });
 });

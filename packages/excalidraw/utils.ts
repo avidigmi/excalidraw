@@ -6,14 +6,12 @@ import {
   isDarwin,
   WINDOWS_EMOJI_FALLBACK_FONT,
 } from "./constants";
-import { FontFamilyValues, FontString } from "./element/types";
 import {
-  ActiveTool,
-  AppState,
-  ToolType,
-  UnsubscribeCallback,
-  Zoom,
-} from "./types";
+  FontFamilyValues,
+  FontString,
+  NonDeletedExcalidrawElement,
+} from "./element/types";
+import { ActiveTool, AppState, ToolType, Zoom } from "./types";
 import { unstable_batchedUpdates } from "react-dom";
 import { ResolutionType } from "./utility-types";
 import React from "react";
@@ -79,9 +77,7 @@ export const isWritableElement = (
   target instanceof HTMLBRElement || // newline in wysiwyg
   target instanceof HTMLTextAreaElement ||
   (target instanceof HTMLInputElement &&
-    (target.type === "text" ||
-      target.type === "number" ||
-      target.type === "password"));
+    (target.type === "text" || target.type === "number"));
 
 export const getFontFamilyString = ({
   fontFamily,
@@ -775,41 +771,13 @@ export const queryFocusableElements = (container: HTMLElement | null) => {
     : [];
 };
 
-/** use as a fallback after identity check (for perf reasons) */
-const _defaultIsShallowComparatorFallback = (a: any, b: any): boolean => {
-  // consider two empty arrays equal
-  if (
-    Array.isArray(a) &&
-    Array.isArray(b) &&
-    a.length === 0 &&
-    b.length === 0
-  ) {
-    return true;
-  }
-  return a === b;
-};
-
-/**
- * Returns whether object/array is shallow equal.
- * Considers empty object/arrays as equal (whether top-level or second-level).
- */
 export const isShallowEqual = <
   T extends Record<string, any>,
-  K extends readonly unknown[],
+  I extends keyof T,
 >(
   objA: T,
   objB: T,
-  comparators?:
-    | { [key in keyof T]?: (a: T[key], b: T[key]) => boolean }
-    | (keyof T extends K[number]
-        ? K extends readonly (keyof T)[]
-          ? K
-          : {
-              _error: "keys are either missing or include keys not in compared obj";
-            }
-        : {
-            _error: "keys are either missing or include keys not in compared obj";
-          }),
+  comparators?: Record<I, (a: T[I], b: T[I]) => boolean>,
   debug = false,
 ) => {
   const aKeys = Object.keys(objA);
@@ -817,38 +785,13 @@ export const isShallowEqual = <
   if (aKeys.length !== bKeys.length) {
     return false;
   }
-
-  if (comparators && Array.isArray(comparators)) {
-    for (const key of comparators) {
-      const ret =
-        objA[key] === objB[key] ||
-        _defaultIsShallowComparatorFallback(objA[key], objB[key]);
-      if (!ret) {
-        if (debug) {
-          console.warn(
-            `%cisShallowEqual: ${key} not equal ->`,
-            "color: #8B4000",
-            objA[key],
-            objB[key],
-          );
-        }
-        return false;
-      }
-    }
-    return true;
-  }
-
   return aKeys.every((key) => {
-    const comparator = (
-      comparators as { [key in keyof T]?: (a: T[key], b: T[key]) => boolean }
-    )?.[key as keyof T];
+    const comparator = comparators?.[key as I];
     const ret = comparator
       ? comparator(objA[key], objB[key])
-      : objA[key] === objB[key] ||
-        _defaultIsShallowComparatorFallback(objA[key], objB[key]);
-
+      : objA[key] === objB[key];
     if (!ret && debug) {
-      console.warn(
+      console.info(
         `%cisShallowEqual: ${key} not equal ->`,
         "color: #8B4000",
         objA[key],
@@ -876,6 +819,19 @@ export const composeEventHandlers = <E>(
       return ourEventHandler?.(event);
     }
   };
+};
+
+export const isOnlyExportingSingleFrame = (
+  elements: readonly NonDeletedExcalidrawElement[],
+) => {
+  const frames = elements.filter((element) => element.type === "frame");
+
+  return (
+    frames.length === 1 &&
+    elements.every(
+      (element) => element.type === "frame" || element.frameId === frames[0].id,
+    )
+  );
 };
 
 /**
@@ -984,90 +940,3 @@ export const isMemberOf = <T extends string>(
 };
 
 export const cloneJSON = <T>(obj: T): T => JSON.parse(JSON.stringify(obj));
-
-export const isFiniteNumber = (value: any): value is number => {
-  return typeof value === "number" && Number.isFinite(value);
-};
-
-export const updateStable = <T extends any[] | Record<string, any>>(
-  prevValue: T,
-  nextValue: T,
-) => {
-  if (isShallowEqual(prevValue, nextValue)) {
-    return prevValue;
-  }
-  return nextValue;
-};
-
-// Window
-export function addEventListener<K extends keyof WindowEventMap>(
-  target: Window & typeof globalThis,
-  type: K,
-  listener: (this: Window, ev: WindowEventMap[K]) => any,
-  options?: boolean | AddEventListenerOptions,
-): UnsubscribeCallback;
-export function addEventListener(
-  target: Window & typeof globalThis,
-  type: string,
-  listener: (this: Window, ev: Event) => any,
-  options?: boolean | AddEventListenerOptions,
-): UnsubscribeCallback;
-// Document
-export function addEventListener<K extends keyof DocumentEventMap>(
-  target: Document,
-  type: K,
-  listener: (this: Document, ev: DocumentEventMap[K]) => any,
-  options?: boolean | AddEventListenerOptions,
-): UnsubscribeCallback;
-export function addEventListener(
-  target: Document,
-  type: string,
-  listener: (this: Document, ev: Event) => any,
-  options?: boolean | AddEventListenerOptions,
-): UnsubscribeCallback;
-// FontFaceSet (document.fonts)
-export function addEventListener<K extends keyof FontFaceSetEventMap>(
-  target: FontFaceSet,
-  type: K,
-  listener: (this: FontFaceSet, ev: FontFaceSetEventMap[K]) => any,
-  options?: boolean | AddEventListenerOptions,
-): UnsubscribeCallback;
-// HTMLElement / mix
-export function addEventListener<K extends keyof HTMLElementEventMap>(
-  target:
-    | Document
-    | (Window & typeof globalThis)
-    | HTMLElement
-    | undefined
-    | null
-    | false,
-  type: K,
-  listener: (this: HTMLDivElement, ev: HTMLElementEventMap[K]) => any,
-  options?: boolean | AddEventListenerOptions,
-): UnsubscribeCallback;
-// implem
-export function addEventListener(
-  /**
-   * allows for falsy values so you don't have to type check when adding
-   * event listeners to optional elements
-   */
-  target:
-    | Document
-    | (Window & typeof globalThis)
-    | FontFaceSet
-    | HTMLElement
-    | undefined
-    | null
-    | false,
-  type: keyof WindowEventMap | keyof DocumentEventMap | string,
-  listener: (ev: Event) => any,
-  options?: boolean | AddEventListenerOptions,
-): UnsubscribeCallback {
-  if (!target) {
-    return () => {};
-  }
-  target?.addEventListener?.(type, listener, options);
-  return () => {
-    target?.removeEventListener?.(type, listener, options);
-  };
-}

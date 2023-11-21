@@ -11,8 +11,6 @@
     "copyAsPng": "Panoya PNG olarak kopyala",
     "copyAsSvg": "Panoya SVG olarak kopyala",
     "copyText": "Panoya metin olarak kopyala",
-    "copySource": "",
-    "convertToCode": "",
     "bringForward": "Bir öne getir",
     "sendToBack": "Arkaya gönder",
     "bringToFront": "En öne getir",
@@ -38,12 +36,8 @@
     "arrowhead_none": "Yok",
     "arrowhead_arrow": "Ok",
     "arrowhead_bar": "Çizgi",
-    "arrowhead_circle": "",
-    "arrowhead_circle_outline": "",
+    "arrowhead_dot": "Nokta",
     "arrowhead_triangle": "Üçgen",
-    "arrowhead_triangle_outline": "",
-    "arrowhead_diamond": "",
-    "arrowhead_diamond_outline": "",
     "fontSize": "Yazı tipi boyutu",
     "fontFamily": "Yazı tipi ailesi",
     "addWatermark": "\"Excalidraw ile yapıldı\" yazısını ekle",
@@ -136,9 +130,7 @@
     "sidebarLock": "Kenar çubuğu açık kalsın",
     "selectAllElementsInFrame": "Çerçevedeki tüm bileşenleri seç",
     "removeAllElementsFromFrame": "Çerçevedeki tüm bileşenleri sil",
-    "eyeDropper": "Tuvalden renk seç",
-    "textToDiagram": "",
-    "prompt": ""
+    "eyeDropper": "Tuvalden renk seç"
   },
   "library": {
     "noItems": "Öğe eklenmedi...",
@@ -217,7 +209,6 @@
     "importLibraryError": "Kütüphane yüklenemedi",
     "collabSaveFailed": "Backend veritabanına kaydedilemedi. Eğer problem devam ederse, çalışmanızı korumak için dosyayı yerel olarak kaydetmelisiniz.",
     "collabSaveFailed_sizeExceeded": "Backend veritabanına kaydedilemedi; tuval çok büyük. Çalışmanızı korumak için dosyayı yerel olarak kaydetmelisiniz.",
-    "imageToolNotSupported": "",
     "brave_measure_text_error": {
       "line1": "",
       "line2": "",
@@ -226,12 +217,8 @@
     },
     "libraryElementTypeError": {
       "embeddable": "",
-      "iframe": "",
       "image": "Resimleri kütüphaneye ekleme desteği yakında geliyor!"
-    },
-    "asyncPasteFailedOnRead": "",
-    "asyncPasteFailedOnParse": "",
-    "copyToSystemClipboardFailed": ""
+    }
   },
   "toolBar": {
     "selection": "Seçme",
@@ -249,13 +236,10 @@
     "link": "Seçilen şekil için bağlantı Ekle/Güncelle",
     "eraser": "Silgi",
     "frame": "Çerçeve aracı",
-    "magicframe": "",
     "embeddable": "Web Yerleştirme",
     "laser": "Lazer işaretçisi",
     "hand": "",
-    "extraTools": "Daha fazla araç",
-    "mermaidToExcalidraw": "",
-    "magicSettings": ""
+    "extraTools": "Daha fazla araç"
   },
   "headings": {
     "canvasActions": "Tuval eylemleri",
@@ -514,12 +498,5 @@
         "description": ""
       }
     }
-  },
-  "mermaid": {
-    "title": "",
-    "button": "",
-    "description": "",
-    "syntax": "",
-    "preview": ""
   }
 }

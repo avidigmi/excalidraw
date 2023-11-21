@@ -5,7 +5,7 @@ import {
   ExcalidrawTextElementWithContainer,
   FontString,
 } from "../element/types";
-import { Excalidraw } from "../index";
+import { Excalidraw } from "../packages/excalidraw/index";
 import { centerPoint } from "../math";
 import { reseed } from "../random";
 import * as Renderer from "../renderer/renderScene";
@@ -173,14 +173,14 @@ describe("Test Linear Elements", () => {
     createTwoPointerLinearElement("line");
     const line = h.elements[0] as ExcalidrawLinearElement;
 
-    expect(renderInteractiveScene.mock.calls.length).toMatchInlineSnapshot(`5`);
-    expect(renderStaticScene.mock.calls.length).toMatchInlineSnapshot(`5`);
+    expect(renderInteractiveScene).toHaveBeenCalledTimes(5);
+    expect(renderStaticScene).toHaveBeenCalledTimes(5);
     expect((h.elements[0] as ExcalidrawLinearElement).points.length).toEqual(2);
 
     // drag line from midpoint
     drag(midpoint, [midpoint[0] + delta, midpoint[1] + delta]);
-    expect(renderInteractiveScene.mock.calls.length).toMatchInlineSnapshot(`9`);
-    expect(renderStaticScene.mock.calls.length).toMatchInlineSnapshot(`7`);
+    expect(renderInteractiveScene).toHaveBeenCalledTimes(9);
+    expect(renderStaticScene).toHaveBeenCalledTimes(7);
     expect(line.points.length).toEqual(3);
     expect(line.points).toMatchInlineSnapshot(`
       [
@@ -273,10 +273,8 @@ describe("Test Linear Elements", () => {
 
       // drag line from midpoint
       drag(midpoint, [midpoint[0] + delta, midpoint[1] + delta]);
-      expect(renderInteractiveScene.mock.calls.length).toMatchInlineSnapshot(
-        `12`,
-      );
-      expect(renderStaticScene.mock.calls.length).toMatchInlineSnapshot(`6`);
+      expect(renderInteractiveScene).toHaveBeenCalledTimes(13);
+      expect(renderStaticScene).toHaveBeenCalledTimes(6);
 
       expect(line.points.length).toEqual(3);
       expect(line.points).toMatchInlineSnapshot(`
@@ -313,10 +311,8 @@ describe("Test Linear Elements", () => {
       // update roundness
       fireEvent.click(screen.getByTitle("Round"));
 
-      expect(renderInteractiveScene.mock.calls.length).toMatchInlineSnapshot(
-        `10`,
-      );
-      expect(renderStaticScene.mock.calls.length).toMatchInlineSnapshot(`8`);
+      expect(renderInteractiveScene).toHaveBeenCalledTimes(10);
+      expect(renderStaticScene).toHaveBeenCalledTimes(8);
 
       const midPointsWithRoundEdge = LinearElementEditor.getEditorMidPoints(
         h.elements[0] as ExcalidrawLinearElement,
@@ -361,10 +357,8 @@ describe("Test Linear Elements", () => {
       // Move the element
       drag(startPoint, endPoint);
 
-      expect(renderInteractiveScene.mock.calls.length).toMatchInlineSnapshot(
-        `13`,
-      );
-      expect(renderStaticScene.mock.calls.length).toMatchInlineSnapshot(`9`);
+      expect(renderInteractiveScene).toHaveBeenCalledTimes(14);
+      expect(renderStaticScene).toHaveBeenCalledTimes(9);
 
       expect([line.x, line.y]).toEqual([
         points[0][0] + deltaX,
@@ -422,10 +416,8 @@ describe("Test Linear Elements", () => {
           lastSegmentMidpoint[1] + delta,
         ]);
 
-        expect(renderInteractiveScene.mock.calls.length).toMatchInlineSnapshot(
-          `17`,
-        );
-        expect(renderStaticScene.mock.calls.length).toMatchInlineSnapshot(`9`);
+        expect(renderInteractiveScene).toHaveBeenCalledTimes(19);
+        expect(renderStaticScene).toHaveBeenCalledTimes(9);
 
         expect(line.points.length).toEqual(5);
 
@@ -465,10 +457,8 @@ describe("Test Linear Elements", () => {
         // Drag from first point
         drag(hitCoords, [hitCoords[0] - delta, hitCoords[1] - delta]);
 
-        expect(renderInteractiveScene.mock.calls.length).toMatchInlineSnapshot(
-          `13`,
-        );
-        expect(renderStaticScene.mock.calls.length).toMatchInlineSnapshot(`8`);
+        expect(renderInteractiveScene).toHaveBeenCalledTimes(14);
+        expect(renderStaticScene).toHaveBeenCalledTimes(8);
 
         const newPoints = LinearElementEditor.getPointsGlobalCoordinates(line);
         expect([newPoints[0][0], newPoints[0][1]]).toEqual([
@@ -494,10 +484,8 @@ describe("Test Linear Elements", () => {
         // Drag from first point
         drag(hitCoords, [hitCoords[0] + delta, hitCoords[1] + delta]);
 
-        expect(renderInteractiveScene.mock.calls.length).toMatchInlineSnapshot(
-          `13`,
-        );
-        expect(renderStaticScene.mock.calls.length).toMatchInlineSnapshot(`8`);
+        expect(renderInteractiveScene).toHaveBeenCalledTimes(14);
+        expect(renderStaticScene).toHaveBeenCalledTimes(8);
 
         const newPoints = LinearElementEditor.getPointsGlobalCoordinates(line);
         expect([newPoints[0][0], newPoints[0][1]]).toEqual([
@@ -531,10 +519,8 @@ describe("Test Linear Elements", () => {
         // delete 3rd point
         deletePoint(points[2]);
         expect(line.points.length).toEqual(3);
-        expect(renderInteractiveScene.mock.calls.length).toMatchInlineSnapshot(
-          `19`,
-        );
-        expect(renderStaticScene.mock.calls.length).toMatchInlineSnapshot(`9`);
+        expect(renderInteractiveScene).toHaveBeenCalledTimes(20);
+        expect(renderStaticScene).toHaveBeenCalledTimes(9);
 
         const newMidPoints = LinearElementEditor.getEditorMidPoints(
           line,
@@ -580,10 +566,8 @@ describe("Test Linear Elements", () => {
           lastSegmentMidpoint[0] + delta,
           lastSegmentMidpoint[1] + delta,
         ]);
-        expect(renderInteractiveScene.mock.calls.length).toMatchInlineSnapshot(
-          `17`,
-        );
-        expect(renderStaticScene.mock.calls.length).toMatchInlineSnapshot(`9`);
+        expect(renderInteractiveScene).toHaveBeenCalledTimes(19);
+        expect(renderStaticScene).toHaveBeenCalledTimes(9);
         expect(line.points.length).toEqual(5);
 
         expect((h.elements[0] as ExcalidrawLinearElement).points)
@@ -658,10 +642,8 @@ describe("Test Linear Elements", () => {
         // Drag from first point
         drag(hitCoords, [hitCoords[0] + delta, hitCoords[1] + delta]);
 
-        expect(renderInteractiveScene.mock.calls.length).toMatchInlineSnapshot(
-          `13`,
-        );
-        expect(renderStaticScene.mock.calls.length).toMatchInlineSnapshot(`8`);
+        expect(renderInteractiveScene).toHaveBeenCalledTimes(14);
+        expect(renderStaticScene).toHaveBeenCalledTimes(8);
 
         const newPoints = LinearElementEditor.getPointsGlobalCoordinates(line);
         expect([newPoints[0][0], newPoints[0][1]]).toEqual([

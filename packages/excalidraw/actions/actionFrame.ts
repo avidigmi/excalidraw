@@ -7,27 +7,23 @@ import { AppClassProperties, AppState } from "../types";
 import { updateActiveTool } from "../utils";
 import { setCursorForShape } from "../cursor";
 import { register } from "./register";
-import { isFrameLikeElement } from "../element/typeChecks";
 
 const isSingleFrameSelected = (appState: AppState, app: AppClassProperties) => {
   const selectedElements = app.scene.getSelectedElements(appState);
 
-  return (
-    selectedElements.length === 1 && isFrameLikeElement(selectedElements[0])
-  );
+  return selectedElements.length === 1 && selectedElements[0].type === "frame";
 };
 
 export const actionSelectAllElementsInFrame = register({
   name: "selectAllElementsInFrame",
   trackEvent: { category: "canvas" },
   perform: (elements, appState, _, app) => {
-    const selectedElement =
-      app.scene.getSelectedElements(appState).at(0) || null;
+    const selectedFrame = app.scene.getSelectedElements(appState)[0];
 
-    if (isFrameLikeElement(selectedElement)) {
+    if (selectedFrame && selectedFrame.type === "frame") {
       const elementsInFrame = getFrameChildren(
         getNonDeletedElements(elements),
-        selectedElement.id,
+        selectedFrame.id,
       ).filter((element) => !(element.type === "text" && element.containerId));
 
       return {
@@ -58,20 +54,15 @@ export const actionRemoveAllElementsFromFrame = register({
   name: "removeAllElementsFromFrame",
   trackEvent: { category: "history" },
   perform: (elements, appState, _, app) => {
-    const selectedElement =
-      app.scene.getSelectedElements(appState).at(0) || null;
+    const selectedFrame = app.scene.getSelectedElements(appState)[0];
 
-    if (isFrameLikeElement(selectedElement)) {
+    if (selectedFrame && selectedFrame.type === "frame") {
       return {
-        elements: removeAllElementsFromFrame(
-          elements,
-          selectedElement,
-          appState,
-        ),
+        elements: removeAllElementsFromFrame(elements, selectedFrame, appState),
         appState: {
           ...appState,
           selectedElementIds: {
-            [selectedElement.id]: true,
+            [selectedFrame.id]: true,
           },
         },
         commitToHistory: true,

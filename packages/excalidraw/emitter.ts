@@ -1,5 +1,3 @@
-import { UnsubscribeCallback } from "./types";
-
 type Subscriber<T extends any[]> = (...payload: T) => void;
 
 export class Emitter<T extends any[] = []> {
@@ -17,7 +15,7 @@ export class Emitter<T extends any[] = []> {
    *
    * @returns unsubscribe function
    */
-  on(...handlers: Subscriber<T>[] | Subscriber<T>[][]): UnsubscribeCallback {
+  on(...handlers: Subscriber<T>[] | Subscriber<T>[][]) {
     const _handlers = handlers
       .flat()
       .filter((item) => typeof item === "function");
@@ -25,17 +23,6 @@ export class Emitter<T extends any[] = []> {
     this.subscribers.push(..._handlers);
 
     return () => this.off(_handlers);
-  }
-
-  once(...handlers: Subscriber<T>[] | Subscriber<T>[][]): UnsubscribeCallback {
-    const _handlers = handlers
-      .flat()
-      .filter((item) => typeof item === "function");
-
-    _handlers.push(() => detach());
-
-    const detach = this.on(..._handlers);
-    return detach;
   }
 
   off(...handlers: Subscriber<T>[] | Subscriber<T>[][]) {

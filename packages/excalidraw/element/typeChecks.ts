@@ -1,5 +1,5 @@
 import { ROUNDNESS } from "../constants";
-import { ElementOrToolType } from "../types";
+import { AppState } from "../types";
 import { MarkNonNullable } from "../utility-types";
 import { assertNever } from "../utils";
 import {
@@ -8,6 +8,7 @@ import {
   ExcalidrawEmbeddableElement,
   ExcalidrawLinearElement,
   ExcalidrawBindableElement,
+  ExcalidrawGenericElement,
   ExcalidrawFreeDrawElement,
   InitializedExcalidrawImageElement,
   ExcalidrawImageElement,
@@ -15,12 +16,20 @@ import {
   ExcalidrawTextContainer,
   ExcalidrawFrameElement,
   RoundnessType,
-  ExcalidrawFrameLikeElement,
-  ExcalidrawElementType,
-  ExcalidrawIframeElement,
-  ExcalidrawIframeLikeElement,
-  ExcalidrawMagicFrameElement,
 } from "./types";
+
+export const isGenericElement = (
+  element: ExcalidrawElement | null,
+): element is ExcalidrawGenericElement => {
+  return (
+    element != null &&
+    (element.type === "selection" ||
+      element.type === "rectangle" ||
+      element.type === "diamond" ||
+      element.type === "ellipse" ||
+      element.type === "embeddable")
+  );
+};
 
 export const isInitializedImageElement = (
   element: ExcalidrawElement | null,
@@ -40,20 +49,6 @@ export const isEmbeddableElement = (
   return !!element && element.type === "embeddable";
 };
 
-export const isIframeElement = (
-  element: ExcalidrawElement | null,
-): element is ExcalidrawIframeElement => {
-  return !!element && element.type === "iframe";
-};
-
-export const isIframeLikeElement = (
-  element: ExcalidrawElement | null,
-): element is ExcalidrawIframeLikeElement => {
-  return (
-    !!element && (element.type === "iframe" || element.type === "embeddable")
-  );
-};
-
 export const isTextElement = (
   element: ExcalidrawElement | null,
 ): element is ExcalidrawTextElement => {
@@ -66,21 +61,6 @@ export const isFrameElement = (
   return element != null && element.type === "frame";
 };
 
-export const isMagicFrameElement = (
-  element: ExcalidrawElement | null,
-): element is ExcalidrawMagicFrameElement => {
-  return element != null && element.type === "magicframe";
-};
-
-export const isFrameLikeElement = (
-  element: ExcalidrawElement | null,
-): element is ExcalidrawFrameLikeElement => {
-  return (
-    element != null &&
-    (element.type === "frame" || element.type === "magicframe")
-  );
-};
-
 export const isFreeDrawElement = (
   element?: ExcalidrawElement | null,
 ): element is ExcalidrawFreeDrawElement => {
@@ -88,7 +68,7 @@ export const isFreeDrawElement = (
 };
 
 export const isFreeDrawElementType = (
-  elementType: ExcalidrawElementType,
+  elementType: ExcalidrawElement["type"],
 ): boolean => {
   return elementType === "freedraw";
 };
@@ -106,7 +86,7 @@ export const isArrowElement = (
 };
 
 export const isLinearElementType = (
-  elementType: ElementOrToolType,
+  elementType: AppState["activeTool"]["type"],
 ): boolean => {
   return (
     elementType === "arrow" || elementType === "line" // || elementType === "freedraw"
@@ -125,7 +105,7 @@ export const isBindingElement = (
 };
 
 export const isBindingElementType = (
-  elementType: ElementOrToolType,
+  elementType: AppState["activeTool"]["type"],
 ): boolean => {
   return elementType === "arrow";
 };
@@ -141,10 +121,8 @@ export const isBindableElement = (
       element.type === "diamond" ||
       element.type === "ellipse" ||
       element.type === "image" ||
-      element.type === "iframe" ||
       element.type === "embeddable" ||
       element.type === "frame" ||
-      element.type === "magicframe" ||
       (element.type === "text" && !element.containerId))
   );
 };
@@ -166,7 +144,7 @@ export const isTextBindableContainer = (
 export const isExcalidrawElement = (
   element: any,
 ): element is ExcalidrawElement => {
-  const type: ExcalidrawElementType | undefined = element?.type;
+  const type: ExcalidrawElement["type"] | undefined = element?.type;
   if (!type) {
     return false;
   }
@@ -174,14 +152,12 @@ export const isExcalidrawElement = (
     case "text":
     case "diamond":
     case "rectangle":
-    case "iframe":
     case "embeddable":
     case "ellipse":
     case "arrow":
     case "freedraw":
     case "line":
     case "frame":
-    case "magicframe":
     case "image":
     case "selection": {
       return true;
@@ -214,7 +190,7 @@ export const isBoundToContainer = (
 };
 
 export const isUsingAdaptiveRadius = (type: string) =>
-  type === "rectangle" || type === "embeddable" || type === "iframe";
+  type === "rectangle" || type === "embeddable";
 
 export const isUsingProportionalRadius = (type: string) =>
   type === "line" || type === "arrow" || type === "diamond";

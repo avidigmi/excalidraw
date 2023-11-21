@@ -15,12 +15,9 @@ import {
   ExcalidrawImageElement,
   Theme,
   StrokeRoundness,
+  ExcalidrawFrameElement,
   ExcalidrawEmbeddableElement,
-  ExcalidrawMagicFrameElement,
-  ExcalidrawFrameLikeElement,
-  ExcalidrawElementType,
 } from "./element/types";
-import { Action } from "./actions/types";
 import { Point as RoughPoint } from "roughjs/bin/geometry";
 import { LinearElementEditor } from "./element/linearElementEditor";
 import { SuggestedBinding } from "./element/binding";
@@ -41,9 +38,7 @@ import { Merge, ValueOf } from "./utility-types";
 
 export type Point = Readonly<RoughPoint>;
 
-export type SocketId = string & { _brand: "SocketId" };
-
-export type Collaborator = Readonly<{
+export type Collaborator = {
   pointer?: CollaboratorPointer;
   button?: "up" | "down";
   selectedElementIds?: AppState["selectedElementIds"];
@@ -53,14 +48,12 @@ export type Collaborator = Readonly<{
     background: string;
     stroke: string;
   };
-  // The url of the collaborator's avatar, defaults to username initials
+  // The url of the collaborator's avatar, defaults to username intials
   // if not present
   avatarUrl?: string;
   // user id. If supplied, we'll filter out duplicates when rendering user avatars.
   id?: string;
-  socketId?: SocketId;
-  isCurrentUser?: boolean;
-}>;
+};
 
 export type CollaboratorPointer = {
   x: number;
@@ -108,11 +101,8 @@ export type ToolType =
   | "eraser"
   | "hand"
   | "frame"
-  | "magicframe"
   | "embeddable"
   | "laser";
-
-export type ElementOrToolType = ExcalidrawElementType | ToolType | "custom";
 
 export type ActiveTool =
   | {
@@ -126,11 +116,6 @@ export type ActiveTool =
 
 export type SidebarName = string;
 export type SidebarTabName = string;
-
-export type UserToFollow = {
-  socketId: SocketId;
-  username: string;
-};
 
 type _CommonCanvasAppState = {
   zoom: AppState["zoom"];
@@ -173,6 +158,9 @@ export type InteractiveCanvasAppState = Readonly<
     suggestedBindings: AppState["suggestedBindings"];
     isRotating: AppState["isRotating"];
     elementsToHighlight: AppState["elementsToHighlight"];
+    // App
+    openSidebar: AppState["openSidebar"];
+    showHyperlinkPopup: AppState["showHyperlinkPopup"];
     // Collaborators
     collaborators: AppState["collaborators"];
     // SnapLines
@@ -181,7 +169,7 @@ export type InteractiveCanvasAppState = Readonly<
   }
 >;
 
-export interface AppState {
+export type AppState = {
   contextMenu: {
     items: ContextMenuItems;
     top: number;
@@ -201,7 +189,7 @@ export interface AppState {
   isBindingEnabled: boolean;
   startBoundElement: NonDeleted<ExcalidrawBindableElement> | null;
   suggestedBindings: SuggestedBinding[];
-  frameToHighlight: NonDeleted<ExcalidrawFrameLikeElement> | null;
+  frameToHighlight: NonDeleted<ExcalidrawFrameElement> | null;
   frameRendering: {
     enabled: boolean;
     name: boolean;
@@ -253,18 +241,7 @@ export interface AppState {
   openMenu: "canvas" | "shape" | null;
   openPopup: "canvasBackground" | "elementBackground" | "elementStroke" | null;
   openSidebar: { name: SidebarName; tab?: SidebarTabName } | null;
-  openDialog:
-    | null
-    | { name: "imageExport" | "help" | "jsonExport" }
-    | {
-        name: "settings";
-        source:
-          | "tool" // when magicframe tool is selected
-          | "generation" // when magicframe generate button is clicked
-          | "settings"; // when AI settings dialog is explicitly invoked
-        tab: "text-to-diagram" | "diagram-to-code";
-      }
-    | { name: "ttd"; tab: "text-to-diagram" | "mermaid" };
+  openDialog: "imageExport" | "help" | "jsonExport" | "mermaid" | null;
   /**
    * Reflects user preference for whether the default sidebar should be docked.
    *
@@ -296,7 +273,7 @@ export interface AppState {
   offsetLeft: number;
 
   fileHandle: FileSystemHandle | null;
-  collaborators: Map<SocketId, Collaborator>;
+  collaborators: Map<string, Collaborator>;
   showStats: boolean;
   currentChartType: ChartType;
   pasteDialog:
@@ -312,17 +289,14 @@ export interface AppState {
   pendingImageElementId: ExcalidrawImageElement["id"] | null;
   showHyperlinkPopup: false | "info" | "editor";
   selectedLinearElement: LinearElementEditor | null;
+
   snapLines: readonly SnapLine[];
   originSnapOffset: {
     x: number;
     y: number;
   } | null;
   objectsSnapModeEnabled: boolean;
-  /** the user's clientId & username who is being followed on the canvas */
-  userToFollow: UserToFollow | null;
-  /** the clientIds of the users following the current user */
-  followedBy: Set<SocketId>;
-}
+};
 
 export type UIAppState = Omit<
   AppState,
@@ -397,11 +371,6 @@ export type ExcalidrawInitialDataState = Merge<
   }
 >;
 
-export type OnUserFollowedPayload = {
-  userToFollow: UserToFollow;
-  action: "FOLLOW" | "UNFOLLOW";
-};
-
 export interface ExcalidrawProps {
   onChange?: (
     elements: readonly ExcalidrawElement[],
@@ -455,8 +424,7 @@ export interface ExcalidrawProps {
     activeTool: AppState["activeTool"],
     pointerDownState: PointerDownState,
   ) => void;
-  onScrollChange?: (scrollX: number, scrollY: number, zoom: Zoom) => void;
-  onUserFollow?: (payload: OnUserFollowedPayload) => void;
+  onScrollChange?: (scrollX: number, scrollY: number) => void;
   children?: React.ReactNode;
   validateEmbeddable?:
     | boolean
@@ -468,13 +436,12 @@ export interface ExcalidrawProps {
     element: NonDeleted<ExcalidrawEmbeddableElement>,
     appState: AppState,
   ) => JSX.Element | null;
-  aiEnabled?: boolean;
 }
 
 export type SceneData = {
   elements?: ImportedDataState["elements"];
   appState?: ImportedDataState["appState"];
-  collaborators?: Map<SocketId, Collaborator>;
+  collaborators?: Map<string, Collaborator>;
   commitToHistory?: boolean;
 };
 
@@ -500,10 +467,10 @@ export type ExportOpts = {
   ) => JSX.Element;
 };
 
-// NOTE at the moment, if action name corresponds to canvasAction prop, its
+// NOTE at the moment, if action name coressponds to canvasAction prop, its
 // truthiness value will determine whether the action is rendered or not
 // (see manager renderAction). We also override canvasAction values in
-// Excalidraw package index.tsx.
+// excalidraw package index.tsx.
 export type CanvasActions = Partial<{
   changeViewBackgroundColor: boolean;
   clearCanvas: boolean;
@@ -537,7 +504,6 @@ export type AppProps = Merge<
     handleKeyboardGlobally: boolean;
     isCollaborating: boolean;
     children?: React.ReactNode;
-    aiEnabled: boolean;
   }
 >;
 
@@ -571,8 +537,6 @@ export type AppClassProperties = {
   togglePenMode: App["togglePenMode"];
   setActiveTool: App["setActiveTool"];
   setOpenDialog: App["setOpenDialog"];
-  insertEmbeddableElement: App["insertEmbeddableElement"];
-  onMagicframeToolSelect: App["onMagicframeToolSelect"];
 };
 
 export type PointerDownState = Readonly<{
@@ -641,7 +605,7 @@ export type PointerDownState = Readonly<{
   };
 }>;
 
-export type UnsubscribeCallback = () => void;
+type UnsubscribeCallback = () => void;
 
 export type ExcalidrawImperativeAPI = {
   updateScene: InstanceType<typeof App>["updateScene"];
@@ -657,7 +621,6 @@ export type ExcalidrawImperativeAPI = {
   getSceneElements: InstanceType<typeof App>["getSceneElements"];
   getAppState: () => InstanceType<typeof App>["state"];
   getFiles: () => InstanceType<typeof App>["files"];
-  registerAction: (action: Action) => void;
   refresh: InstanceType<typeof App>["refresh"];
   setToast: InstanceType<typeof App>["setToast"];
   addFiles: (data: BinaryFileData[]) => void;
@@ -693,12 +656,6 @@ export type ExcalidrawImperativeAPI = {
       event: PointerEvent,
     ) => void,
   ) => UnsubscribeCallback;
-  onScrollChange: (
-    callback: (scrollX: number, scrollY: number, zoom: Zoom) => void,
-  ) => UnsubscribeCallback;
-  onUserFollow: (
-    callback: (payload: OnUserFollowedPayload) => void,
-  ) => UnsubscribeCallback;
 };
 
 export type Device = Readonly<{
@@ -722,14 +679,12 @@ type FrameNameBounds = {
 };
 
 export type FrameNameBoundsCache = {
-  get: (
-    frameElement: ExcalidrawFrameLikeElement | ExcalidrawMagicFrameElement,
-  ) => FrameNameBounds | null;
+  get: (frameElement: ExcalidrawFrameElement) => FrameNameBounds | null;
   _cache: Map<
     string,
     FrameNameBounds & {
       zoom: AppState["zoom"]["value"];
-      versionNonce: ExcalidrawFrameLikeElement["versionNonce"];
+      versionNonce: ExcalidrawFrameElement["versionNonce"];
     }
   >;
 };
@@ -749,5 +704,3 @@ export type Primitive =
   | symbol
   | null
   | undefined;
-
-export type JSONValue = string | number | boolean | null | object;

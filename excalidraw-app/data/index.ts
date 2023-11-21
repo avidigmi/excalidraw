@@ -1,36 +1,27 @@
-import {
-  compressData,
-  decompressData,
-} from "../../packages/excalidraw/data/encode";
+import { compressData, decompressData } from "../../src/data/encode";
 import {
   decryptData,
   generateEncryptionKey,
   IV_LENGTH_BYTES,
-} from "../../packages/excalidraw/data/encryption";
-import { serializeAsJSON } from "../../packages/excalidraw/data/json";
-import { restore } from "../../packages/excalidraw/data/restore";
-import { ImportedDataState } from "../../packages/excalidraw/data/types";
-import { SceneBounds } from "../../packages/excalidraw/element/bounds";
-import { isInvisiblySmallElement } from "../../packages/excalidraw/element/sizeHelpers";
-import { isInitializedImageElement } from "../../packages/excalidraw/element/typeChecks";
-import {
-  ExcalidrawElement,
-  FileId,
-} from "../../packages/excalidraw/element/types";
-import { t } from "../../packages/excalidraw/i18n";
+} from "../../src/data/encryption";
+import { serializeAsJSON } from "../../src/data/json";
+import { restore } from "../../src/data/restore";
+import { ImportedDataState } from "../../src/data/types";
+import { isInvisiblySmallElement } from "../../src/element/sizeHelpers";
+import { isInitializedImageElement } from "../../src/element/typeChecks";
+import { ExcalidrawElement, FileId } from "../../src/element/types";
+import { t } from "../../src/i18n";
 import {
   AppState,
   BinaryFileData,
   BinaryFiles,
-  SocketId,
   UserIdleState,
-} from "../../packages/excalidraw/types";
-import { bytesToHexString } from "../../packages/excalidraw/utils";
+} from "../../src/types";
+import { bytesToHexString } from "../../src/utils";
 import {
   DELETED_ELEMENT_TIMEOUT,
   FILE_UPLOAD_MAX_BYTES,
   ROOM_ID_BYTES,
-  WS_SUBTYPES,
 } from "../app_constants";
 import { encodeFilesForUpload } from "./FileManager";
 import { saveFilesToFirebase } from "./firebase";
@@ -100,43 +91,32 @@ export type EncryptedData = {
 };
 
 export type SocketUpdateDataSource = {
-  INVALID_RESPONSE: {
-    type: WS_SUBTYPES.INVALID_RESPONSE;
-  };
   SCENE_INIT: {
-    type: WS_SUBTYPES.INIT;
+    type: "SCENE_INIT";
     payload: {
       elements: readonly ExcalidrawElement[];
     };
   };
   SCENE_UPDATE: {
-    type: WS_SUBTYPES.UPDATE;
+    type: "SCENE_UPDATE";
     payload: {
       elements: readonly ExcalidrawElement[];
     };
   };
   MOUSE_LOCATION: {
-    type: WS_SUBTYPES.MOUSE_LOCATION;
+    type: "MOUSE_LOCATION";
     payload: {
-      socketId: SocketId;
+      socketId: string;
       pointer: { x: number; y: number; tool: "pointer" | "laser" };
       button: "down" | "up";
       selectedElementIds: AppState["selectedElementIds"];
       username: string;
     };
   };
-  USER_VISIBLE_SCENE_BOUNDS: {
-    type: WS_SUBTYPES.USER_VISIBLE_SCENE_BOUNDS;
-    payload: {
-      socketId: SocketId;
-      username: string;
-      sceneBounds: SceneBounds;
-    };
-  };
   IDLE_STATUS: {
-    type: WS_SUBTYPES.IDLE_STATUS;
+    type: "IDLE_STATUS";
     payload: {
-      socketId: SocketId;
+      socketId: string;
       userState: UserIdleState;
       username: string;
     };
@@ -144,7 +124,10 @@ export type SocketUpdateDataSource = {
 };
 
 export type SocketUpdateDataIncoming =
-  SocketUpdateDataSource[keyof SocketUpdateDataSource];
+  | SocketUpdateDataSource[keyof SocketUpdateDataSource]
+  | {
+      type: "INVALID_RESPONSE";
+    };
 
 export type SocketUpdateData =
   SocketUpdateDataSource[keyof SocketUpdateDataSource] & {

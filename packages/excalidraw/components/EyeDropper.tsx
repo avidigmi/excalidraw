@@ -1,5 +1,5 @@
 import { atom } from "jotai";
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { rgbToHex } from "../colors";
 import { EVENT } from "../constants";

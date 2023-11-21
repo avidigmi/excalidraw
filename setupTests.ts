@@ -2,8 +2,8 @@
 import "vitest-canvas-mock";
 import "@testing-library/jest-dom";
 import { vi } from "vitest";
-import polyfill from "./packages/excalidraw/polyfill";
-import { testPolyfills } from "./packages/excalidraw/tests/helpers/polyfills";
+import polyfill from "./polyfill";
+import { testPolyfills } from "./tests/helpers/polyfills";
 
 Object.assign(globalThis, testPolyfills);
 

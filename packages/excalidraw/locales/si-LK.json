@@ -11,8 +11,6 @@
     "copyAsPng": "PNG ලෙස පිටපත් කරන්න",
     "copyAsSvg": "SVG ලෙස පිටපත් කරන්න",
     "copyText": "",
-    "copySource": "",
-    "convertToCode": "",
     "bringForward": "ඉදිරියට ගෙන්න",
     "sendToBack": "පසුපසටම ගෙනියන්න",
     "bringToFront": "ඉදිරියටම ගෙන්න",
@@ -38,12 +36,8 @@
     "arrowhead_none": "",
     "arrowhead_arrow": "",
     "arrowhead_bar": "",
-    "arrowhead_circle": "",
-    "arrowhead_circle_outline": "",
+    "arrowhead_dot": "",
     "arrowhead_triangle": "",
-    "arrowhead_triangle_outline": "",
-    "arrowhead_diamond": "",
-    "arrowhead_diamond_outline": "",
     "fontSize": "",
     "fontFamily": "",
     "addWatermark": "",
@@ -136,9 +130,7 @@
     "sidebarLock": "",
     "selectAllElementsInFrame": "",
     "removeAllElementsFromFrame": "",
-    "eyeDropper": "",
-    "textToDiagram": "",
-    "prompt": ""
+    "eyeDropper": ""
   },
   "library": {
     "noItems": "",
@@ -217,7 +209,6 @@
     "importLibraryError": "",
     "collabSaveFailed": "",
     "collabSaveFailed_sizeExceeded": "",
-    "imageToolNotSupported": "",
     "brave_measure_text_error": {
       "line1": "",
       "line2": "",
@@ -226,12 +217,8 @@
     },
     "libraryElementTypeError": {
       "embeddable": "",
-      "iframe": "",
       "image": ""
-    },
-    "asyncPasteFailedOnRead": "",
-    "asyncPasteFailedOnParse": "",
-    "copyToSystemClipboardFailed": ""
+    }
   },
   "toolBar": {
     "selection": "",
@@ -249,13 +236,10 @@
     "link": "",
     "eraser": "",
     "frame": "",
-    "magicframe": "",
     "embeddable": "",
     "laser": "",
     "hand": "",
-    "extraTools": "",
-    "mermaidToExcalidraw": "",
-    "magicSettings": ""
+    "extraTools": ""
   },
   "headings": {
     "canvasActions": "",
@@ -514,12 +498,5 @@
         "description": ""
       }
     }
-  },
-  "mermaid": {
-    "title": "",
-    "button": "",
-    "description": "",
-    "syntax": "",
-    "preview": ""
   }
 }

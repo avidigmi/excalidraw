@@ -1,4 +1,3 @@
-import { TOOL_TYPE } from "./constants";
 import {
   Bounds,
   getCommonBounds,
@@ -6,7 +5,7 @@ import {
   getElementAbsoluteCoords,
 } from "./element/bounds";
 import { MaybeTransformHandleType } from "./element/transformHandles";
-import { isBoundToContainer, isFrameLikeElement } from "./element/typeChecks";
+import { isBoundToContainer, isFrameElement } from "./element/typeChecks";
 import {
   ExcalidrawElement,
   NonDeletedExcalidrawElement,
@@ -263,7 +262,7 @@ const getReferenceElements = (
   appState: AppState,
 ) => {
   const selectedFrames = selectedElements
-    .filter((element) => isFrameLikeElement(element))
+    .filter((element) => isFrameElement(element))
     .map((frame) => frame.id);
 
   return getVisibleAndNonSelectedElements(
@@ -1353,11 +1352,10 @@ export const isActiveToolNonLinearSnappable = (
   activeToolType: AppState["activeTool"]["type"],
 ) => {
   return (
-    activeToolType === TOOL_TYPE.rectangle ||
-    activeToolType === TOOL_TYPE.ellipse ||
-    activeToolType === TOOL_TYPE.diamond ||
-    activeToolType === TOOL_TYPE.frame ||
-    activeToolType === TOOL_TYPE.magicframe ||
-    activeToolType === TOOL_TYPE.image
+    activeToolType === "rectangle" ||
+    activeToolType === "ellipse" ||
+    activeToolType === "diamond" ||
+    activeToolType === "frame" ||
+    activeToolType === "image"
   );
 };

@@ -3,7 +3,6 @@ import { LaserPointer } from "@excalidraw/laser-pointer";
 import { sceneCoordsToViewportCoords } from "../../utils";
 import App from "../App";
 import { getClientColor } from "../../clients";
-import { SocketId } from "../../types";
 
 // decay time in milliseconds
 const DECAY_TIME = 1000;
@@ -89,7 +88,7 @@ type CollabolatorState = {
 
 export class LaserPathManager {
   private ownState: CollabolatorState;
-  private collaboratorsState: Map<SocketId, CollabolatorState> = new Map();
+  private collaboratorsState: Map<string, CollabolatorState> = new Map();
 
   private rafId: number | undefined;
   private isDrawing = false;

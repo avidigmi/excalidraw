@@ -11,8 +11,6 @@
     "copyAsPng": "کپی در حافطه موقت به صورت PNG",
     "copyAsSvg": "کپی در حافطه موقت به صورت SVG",
     "copyText": "کپی در حافطه موقت به صورت متن",
-    "copySource": "",
-    "convertToCode": "",
     "bringForward": "جلو آوردن",
     "sendToBack": "پس فرستادن",
     "bringToFront": "جلو آوردن",
@@ -38,12 +36,8 @@
     "arrowhead_none": "هیچ کدام",
     "arrowhead_arrow": "پیکان",
     "arrowhead_bar": "میله ای",
-    "arrowhead_circle": "",
-    "arrowhead_circle_outline": "",
+    "arrowhead_dot": "نقطه",
     "arrowhead_triangle": "مثلث",
-    "arrowhead_triangle_outline": "",
-    "arrowhead_diamond": "",
-    "arrowhead_diamond_outline": "",
     "fontSize": "اندازه قلم",
     "fontFamily": "نوع قلم",
     "addWatermark": "\"ساخته شده با Excalidraw\" را اضافه کن",
@@ -136,9 +130,7 @@
     "sidebarLock": "باز نگه داشتن سایدبار",
     "selectAllElementsInFrame": "",
     "removeAllElementsFromFrame": "",
-    "eyeDropper": "انتخاب رنگ از کرباس",
-    "textToDiagram": "",
-    "prompt": ""
+    "eyeDropper": "انتخاب رنگ از کرباس"
   },
   "library": {
     "noItems": "آیتمی به اینجا اضافه نشده...",
@@ -217,7 +209,6 @@
     "importLibraryError": "داده‌ها بارگذاری نشدند",
     "collabSaveFailed": "در پایگاه داده باطن ذخیره نشد. اگر مشکلات همچنان ادامه داشت، باید فایل خود را به صورت محلی ذخیره کنید تا مطمئن شوید کار خود را از دست نمی دهید.",
     "collabSaveFailed_sizeExceeded": "در پایگاه داده بکند ذخیره نشد. اگر مشکلات همچنان ادامه داشت، باید فایل خود را به صورت محلی ذخیره کنید تا مطمئن شوید کار خود را از دست نمی دهید.",
-    "imageToolNotSupported": "",
     "brave_measure_text_error": {
       "line1": "به نظر می‌رسد از مرورگر Brave با تنظیم <bold> مسدود کردن شدید اثرانگشت</bold> استفاده می‌کنید.",
       "line2": "این می تواند منجر به شکستن <bold>عناصر متن</bold> در نقاشی های شما شود.",
@@ -226,12 +217,8 @@
     },
     "libraryElementTypeError": {
       "embeddable": "",
-      "iframe": "",
       "image": ""
-    },
-    "asyncPasteFailedOnRead": "",
-    "asyncPasteFailedOnParse": "",
-    "copyToSystemClipboardFailed": ""
+    }
   },
   "toolBar": {
     "selection": "گزینش",
@@ -249,13 +236,10 @@
     "link": "افزودن/به‌روزرسانی پیوند برای شکل انتخابی",
     "eraser": "پاک کن",
     "frame": "",
-    "magicframe": "",
     "embeddable": "",
     "laser": "",
     "hand": "دست (ابزار پانینگ)",
-    "extraTools": "ابزارهای بیشتر",
-    "mermaidToExcalidraw": "",
-    "magicSettings": ""
+    "extraTools": "ابزارهای بیشتر"
   },
   "headings": {
     "canvasActions": "عملیات روی بوم",
@@ -396,7 +380,7 @@
     "label": {
       "withBackground": "پس زمینه",
       "onlySelected": "",
-      "darkMode": "حالت تیره",
+      "darkMode": "",
       "embedScene": "",
       "scale": "",
       "padding": ""
@@ -410,9 +394,9 @@
       "copyPngToClipboard": ""
     },
     "button": {
-      "exportToPng": "PNG",
-      "exportToSvg": "SVG",
-      "copyPngToClipboard": "کپی در کلیپ‌بورد"
+      "exportToPng": "",
+      "exportToSvg": "",
+      "copyPngToClipboard": ""
     }
   },
   "encrypted": {
@@ -514,12 +498,5 @@
         "description": ""
       }
     }
-  },
-  "mermaid": {
-    "title": "",
-    "button": "",
-    "description": "",
-    "syntax": "",
-    "preview": "پیش‌نمایش"
   }
 }

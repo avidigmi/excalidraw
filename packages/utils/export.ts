@@ -1,23 +1,23 @@
 import {
   exportToCanvas as _exportToCanvas,
   exportToSvg as _exportToSvg,
-} from "../excalidraw/scene/export";
-import { getDefaultAppState } from "../excalidraw/appState";
-import { AppState, BinaryFiles } from "../excalidraw/types";
+} from "../scene/export";
+import { getDefaultAppState } from "../appState";
+import { AppState, BinaryFiles } from "../types";
 import {
   ExcalidrawElement,
-  ExcalidrawFrameLikeElement,
+  ExcalidrawFrameElement,
   NonDeleted,
-} from "../excalidraw/element/types";
-import { restore } from "../excalidraw/data/restore";
-import { MIME_TYPES } from "../excalidraw/constants";
-import { encodePngMetadata } from "../excalidraw/data/image";
-import { serializeAsJSON } from "../excalidraw/data/json";
+} from "../element/types";
+import { restore } from "../data/restore";
+import { MIME_TYPES } from "../constants";
+import { encodePngMetadata } from "../data/image";
+import { serializeAsJSON } from "../data/json";
 import {
   copyBlobToClipboardAsPng,
   copyTextToSystemClipboard,
   copyToClipboard,
-} from "../excalidraw/clipboard";
+} from "../clipboard";
 
 export { MIME_TYPES };
 
@@ -26,7 +26,7 @@ type ExportOpts = {
   appState?: Partial<Omit<AppState, "offsetTop" | "offsetLeft">>;
   files: BinaryFiles | null;
   maxWidthOrHeight?: number;
-  exportingFrame?: ExcalidrawFrameLikeElement | null;
+  exportingFrame?: ExcalidrawFrameElement | null;
   getDimensions?: (
     width: number,
     height: number,
@@ -212,14 +212,11 @@ export {
   isElementInsideBBox,
   elementPartiallyOverlapsWithOrContainsBBox,
 } from "./withinBounds";
-export {
-  serializeAsJSON,
-  serializeLibraryAsJSON,
-} from "../excalidraw/data/json";
+export { serializeAsJSON, serializeLibraryAsJSON } from "../data/json";
 export {
   loadFromBlob,
   loadSceneOrLibraryFromBlob,
   loadLibraryFromBlob,
-} from "../excalidraw/data/blob";
-export { getFreeDrawSvgPath } from "../excalidraw/renderer/renderElement";
-export { mergeLibraryItems } from "../excalidraw/data/library";
+} from "../data/blob";
+export { getFreeDrawSvgPath } from "../renderer/renderElement";
+export { mergeLibraryItems } from "../data/library";

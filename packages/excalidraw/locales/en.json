@@ -11,8 +11,6 @@
     "copyAsPng": "Copy to clipboard as PNG",
     "copyAsSvg": "Copy to clipboard as SVG",
     "copyText": "Copy to clipboard as text",
-    "copySource": "Copy source to clipboard",
-    "convertToCode": "Convert to code",
     "bringForward": "Bring forward",
     "sendToBack": "Send to back",
     "bringToFront": "Bring to front",
@@ -38,12 +36,8 @@
     "arrowhead_none": "None",
     "arrowhead_arrow": "Arrow",
     "arrowhead_bar": "Bar",
-    "arrowhead_circle": "Circle",
-    "arrowhead_circle_outline": "Circle (outline)",
+    "arrowhead_dot": "Dot",
     "arrowhead_triangle": "Triangle",
-    "arrowhead_triangle_outline": "Triangle (outline)",
-    "arrowhead_diamond": "Diamond",
-    "arrowhead_diamond_outline": "Diamond (outline)",
     "fontSize": "Font size",
     "fontFamily": "Font family",
     "addWatermark": "Add \"Made with Excalidraw\"",
@@ -136,9 +130,7 @@
     "sidebarLock": "Keep sidebar open",
     "selectAllElementsInFrame": "Select all elements in frame",
     "removeAllElementsFromFrame": "Remove all elements from frame",
-    "eyeDropper": "Pick color from canvas",
-    "textToDiagram": "Text to diagram",
-    "prompt": "Prompt"
+    "eyeDropper": "Pick color from canvas"
   },
   "library": {
     "noItems": "No items added yet...",
@@ -226,7 +218,6 @@
     },
     "libraryElementTypeError": {
       "embeddable": "Embeddable elements cannot be added to the library.",
-      "iframe": "IFrame elements cannot be added to the library.",
       "image": "Support for adding images to the library coming soon!"
     },
     "asyncPasteFailedOnRead": "Couldn't paste (couldn't read from system clipboard).",
@@ -249,13 +240,11 @@
     "link": "Add/ Update link for a selected shape",
     "eraser": "Eraser",
     "frame": "Frame tool",
-    "magicframe": "Wireframe to code",
     "embeddable": "Web Embed",
     "laser": "Laser pointer",
     "hand": "Hand (panning tool)",
     "extraTools": "More tools",
-    "mermaidToExcalidraw": "Mermaid to Excalidraw",
-    "magicSettings": "AI settings"
+    "mermaidToExcalidraw": "Mermaid to Excalidraw"
   },
   "headings": {
     "canvasActions": "Canvas actions",
@@ -518,18 +507,8 @@
   "mermaid": {
     "title": "Mermaid to Excalidraw",
     "button": "Insert",
-    "description": "Currently only <flowchartLink>Flowchart</flowchartLink>,<sequenceLink> Sequence, </sequenceLink> and <classLink>Class </classLink>Diagrams are supported. The other types will be rendered as image in Excalidraw.",
+    "description": "Currently only <flowchartLink>Flowcharts</flowchartLink> and <sequenceLink>Sequence Diagrams</sequenceLink> are supported. The other types will be rendered as image in Excalidraw.",
     "syntax": "Mermaid Syntax",
     "preview": "Preview"
-  },
-  "userList": {
-    "search": {
-      "placeholder": "Quick search",
-      "empty": "No users found"
-    },
-    "hint": {
-      "text": "Click on user to follow",
-      "followStatus": "You're currently following this user"
-    }
   }
 }

@@ -1,5 +1,5 @@
 import ReactDOM from "react-dom";
-import { Excalidraw } from "../index";
+import { Excalidraw } from "../packages/excalidraw/index";
 import { GlobalTestState, render, screen } from "../tests/test-utils";
 import { Keyboard, Pointer, UI } from "../tests/helpers/ui";
 import { CODES, KEYS } from "../keys";

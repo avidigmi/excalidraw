@@ -1,20 +1,20 @@
 import React, { useEffect } from "react";
-import { InitializeApp } from "./components/InitializeApp";
-import App from "./components/App";
-import { isShallowEqual } from "./utils";
+import { InitializeApp } from "../../components/InitializeApp";
+import App from "../../components/App";
+import { isShallowEqual } from "../../utils";
 
-import "./css/app.scss";
-import "./css/styles.scss";
+import "../../css/app.scss";
+import "../../css/styles.scss";
 
-import { AppProps, ExcalidrawProps } from "./types";
-import { defaultLang } from "./i18n";
-import { DEFAULT_UI_OPTIONS } from "./constants";
+import { AppProps, ExcalidrawProps } from "../../types";
+import { defaultLang } from "../../i18n";
+import { DEFAULT_UI_OPTIONS } from "../../constants";
 import { Provider } from "jotai";
-import { jotaiScope, jotaiStore } from "./jotai";
-import Footer from "./components/footer/FooterCenter";
-import MainMenu from "./components/main-menu/MainMenu";
-import WelcomeScreen from "./components/welcome-screen/WelcomeScreen";
-import LiveCollaborationTrigger from "./components/live-collaboration/LiveCollaborationTrigger";
+import { jotaiScope, jotaiStore } from "../../jotai";
+import Footer from "../../components/footer/FooterCenter";
+import MainMenu from "../../components/main-menu/MainMenu";
+import WelcomeScreen from "../../components/welcome-screen/WelcomeScreen";
+import LiveCollaborationTrigger from "../../components/live-collaboration/LiveCollaborationTrigger";
 
 const ExcalidrawBase = (props: ExcalidrawProps) => {
   const {
@@ -44,7 +44,6 @@ const ExcalidrawBase = (props: ExcalidrawProps) => {
     children,
     validateEmbeddable,
     renderEmbeddable,
-    aiEnabled,
   } = props;
 
   const canvasActions = props.UIOptions?.canvasActions;
@@ -123,7 +122,6 @@ const ExcalidrawBase = (props: ExcalidrawProps) => {
           onScrollChange={onScrollChange}
           validateEmbeddable={validateEmbeddable}
           renderEmbeddable={renderEmbeddable}
-          aiEnabled={aiEnabled !== false}
         >
           {children}
         </App>
@@ -196,14 +194,14 @@ export {
   getSceneVersion,
   isInvisiblySmallElement,
   getNonDeletedElements,
-} from "./element";
-export { defaultLang, useI18n, languages } from "./i18n";
+} from "../../element";
+export { defaultLang, useI18n, languages } from "../../i18n";
 export {
   restore,
   restoreAppState,
   restoreElements,
   restoreLibraryItems,
-} from "./data/restore";
+} from "../../data/restore";
 export {
   exportToCanvas,
   exportToBlob,
@@ -216,43 +214,43 @@ export {
   getFreeDrawSvgPath,
   exportToClipboard,
   mergeLibraryItems,
-} from "../utils/export";
-export { isLinearElement } from "./element/typeChecks";
+} from "../../packages/utils";
+export { isLinearElement } from "../../element/typeChecks";
 
-export { FONT_FAMILY, THEME, MIME_TYPES } from "./constants";
+export { FONT_FAMILY, THEME, MIME_TYPES } from "../../constants";
 
 export {
   mutateElement,
   newElementWith,
   bumpVersion,
-} from "./element/mutateElement";
+} from "../../element/mutateElement";
 
-export { parseLibraryTokensFromUrl, useHandleLibrary } from "./data/library";
+export {
+  parseLibraryTokensFromUrl,
+  useHandleLibrary,
+} from "../../data/library";
 
 export {
   sceneCoordsToViewportCoords,
   viewportCoordsToSceneCoords,
-} from "./utils";
+} from "../../utils";
 
-export { Sidebar } from "./components/Sidebar/Sidebar";
-export { Button } from "./components/Button";
+export { Sidebar } from "../../components/Sidebar/Sidebar";
+export { Button } from "../../components/Button";
 export { Footer };
 export { MainMenu };
-export { useDevice } from "./components/App";
+export { useDevice } from "../../components/App";
 export { WelcomeScreen };
 export { LiveCollaborationTrigger };
 
-export { DefaultSidebar } from "./components/DefaultSidebar";
-export { TTDDialog } from "./components/TTDDialog/TTDDialog";
-export { TTDDialogTrigger } from "./components/TTDDialog/TTDDialogTrigger";
+export { DefaultSidebar } from "../../components/DefaultSidebar";
 
-export { normalizeLink } from "./data/url";
-export { zoomToFitBounds } from "./actions/actionCanvas";
-export { convertToExcalidrawElements } from "./data/transform";
-export { getCommonBounds, getVisibleSceneBounds } from "./element/bounds";
+export { normalizeLink } from "../../data/url";
+export { convertToExcalidrawElements } from "../../data/transform";
+export { getCommonBounds } from "../../element/bounds";
 
 export {
   elementsOverlappingBBox,
   isElementInsideBBox,
   elementPartiallyOverlapsWithOrContainsBBox,
-} from "../utils/export";
+} from "../withinBounds";

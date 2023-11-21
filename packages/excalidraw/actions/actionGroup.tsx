@@ -22,8 +22,8 @@ import { AppClassProperties, AppState } from "../types";
 import { isBoundToContainer } from "../element/typeChecks";
 import {
   getElementsInResizingFrame,
-  getFrameLikeElements,
-  groupByFrameLikes,
+  getFrameElements,
+  groupByFrames,
   removeElementsFromFrame,
   replaceAllElementsInFrame,
 } from "../frame";
@@ -102,7 +102,7 @@ export const actionGroup = register({
     // when it happens, we want to remove elements that are in the frame
     // and are going to be grouped from the frame (mouthful, I know)
     if (groupingElementsFromDifferentFrames) {
-      const frameElementsMap = groupByFrameLikes(selectedElements);
+      const frameElementsMap = groupByFrames(selectedElements);
 
       frameElementsMap.forEach((elementsInFrame, frameId) => {
         nextElements = removeElementsFromFrame(
@@ -219,7 +219,7 @@ export const actionUngroup = register({
         .map((element) => element.frameId!),
     );
 
-    const targetFrames = getFrameLikeElements(elements).filter((frame) =>
+    const targetFrames = getFrameElements(elements).filter((frame) =>
       selectedElementFrameIds.has(frame.id),
     );
 

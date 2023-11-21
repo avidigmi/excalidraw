@@ -1281,7 +1281,7 @@ export const ArrowheadArrowIcon = React.memo(
     ),
 );
 
-export const ArrowheadCircleIcon = React.memo(
+export const ArrowheadDotIcon = React.memo(
   ({ flip = false }: { flip?: boolean }) =>
     createIcon(
       <g
@@ -1290,22 +1290,6 @@ export const ArrowheadCircleIcon = React.memo(
         transform={flip ? "translate(40, 0) scale(-1, 1)" : ""}
       >
         <path d="M32 10L6 10" strokeWidth={2} />
-        <circle r="4" transform="matrix(-1 0 0 1 30 10)" />
-      </g>,
-      { width: 40, height: 20 },
-    ),
-);
-
-export const ArrowheadCircleOutlineIcon = React.memo(
-  ({ flip = false }: { flip?: boolean }) =>
-    createIcon(
-      <g
-        stroke="currentColor"
-        fill="none"
-        transform={flip ? "translate(40, 0) scale(-1, 1)" : ""}
-        strokeWidth={2}
-      >
-        <path d="M26 10L6 10" />
         <circle r="4" transform="matrix(-1 0 0 1 30 10)" />
       </g>,
       { width: 40, height: 20 },
@@ -1337,58 +1321,6 @@ export const ArrowheadTriangleIcon = React.memo(
       >
         <path d="M32 10L6 10" strokeWidth={2} />
         <path d="M27.5 5.5L34.5 10L27.5 14.5L27.5 5.5" />
-      </g>,
-      { width: 40, height: 20 },
-    ),
-);
-
-export const ArrowheadTriangleOutlineIcon = React.memo(
-  ({ flip = false }: { flip?: boolean }) =>
-    createIcon(
-      <g
-        stroke="currentColor"
-        fill="none"
-        transform={flip ? "translate(40, 0) scale(-1, 1)" : ""}
-        strokeWidth={2}
-        strokeLinejoin="round"
-      >
-        <path d="M6,9.5H27" />
-        <path d="M27,5L34,10L27,14Z" fill="none" />
-      </g>,
-
-      { width: 40, height: 20 },
-    ),
-);
-
-export const ArrowheadDiamondIcon = React.memo(
-  ({ flip = false }: { flip?: boolean }) =>
-    createIcon(
-      <g
-        stroke="currentColor"
-        fill="currentColor"
-        transform={flip ? "translate(40, 0) scale(-1, 1)" : ""}
-        strokeLinejoin="round"
-        strokeWidth={2}
-      >
-        <path d="M6,9.5H20" />
-        <path d="M27,5L34,10L27,14L20,9.5Z" />
-      </g>,
-      { width: 40, height: 20 },
-    ),
-);
-
-export const ArrowheadDiamondOutlineIcon = React.memo(
-  ({ flip = false }: { flip?: boolean }) =>
-    createIcon(
-      <g
-        stroke="currentColor"
-        fill="none"
-        transform={flip ? "translate(40, 0) scale(-1, 1)" : ""}
-        strokeLinejoin="round"
-        strokeWidth={2}
-      >
-        <path d="M6,9.5H20" />
-        <path d="M27,5L34,10L27,14L20,9.5Z" />
       </g>,
       { width: 40, height: 20 },
     ),
@@ -1755,80 +1687,4 @@ export const laserPointerToolIcon = createIcon(
   </g>,
 
   20,
-);
-
-export const MagicIcon = createIcon(
-  <g stroke="currentColor" fill="none">
-    <path stroke="none" d="M0 0h24v24H0z" />
-    <path d="M6 21l15 -15l-3 -3l-15 15l3 3" />
-    <path d="M15 6l3 3" />
-    <path d="M9 3a2 2 0 0 0 2 2a2 2 0 0 0 -2 2a2 2 0 0 0 -2 -2a2 2 0 0 0 2 -2" />
-    <path d="M19 13a2 2 0 0 0 2 2a2 2 0 0 0 -2 2a2 2 0 0 0 -2 -2a2 2 0 0 0 2 -2" />
-  </g>,
-  tablerIconProps,
-);
-
-export const OpenAIIcon = createIcon(
-  <g stroke="currentColor" fill="none">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-    <path d="M11.217 19.384a3.501 3.501 0 0 0 6.783 -1.217v-5.167l-6 -3.35" />
-    <path d="M5.214 15.014a3.501 3.501 0 0 0 4.446 5.266l4.34 -2.534v-6.946" />
-    <path d="M6 7.63c-1.391 -.236 -2.787 .395 -3.534 1.689a3.474 3.474 0 0 0 1.271 4.745l4.263 2.514l6 -3.348" />
-    <path d="M12.783 4.616a3.501 3.501 0 0 0 -6.783 1.217v5.067l6 3.45" />
-    <path d="M18.786 8.986a3.501 3.501 0 0 0 -4.446 -5.266l-4.34 2.534v6.946" />
-    <path d="M18 16.302c1.391 .236 2.787 -.395 3.534 -1.689a3.474 3.474 0 0 0 -1.271 -4.745l-4.308 -2.514l-5.955 3.42" />
-  </g>,
-  tablerIconProps,
-);
-
-export const fullscreenIcon = createIcon(
-  <g stroke="currentColor" fill="none">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-    <path d="M4 8v-2a2 2 0 0 1 2 -2h2" />
-    <path d="M4 16v2a2 2 0 0 0 2 2h2" />
-    <path d="M16 4h2a2 2 0 0 1 2 2v2" />
-    <path d="M16 20h2a2 2 0 0 0 2 -2v-2" />
-  </g>,
-  tablerIconProps,
-);
-
-export const eyeIcon = createIcon(
-  <g stroke="currentColor" fill="none">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-    <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
-    <path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" />
-  </g>,
-  tablerIconProps,
-);
-
-export const eyeClosedIcon = createIcon(
-  <g stroke="currentColor" fill="none">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-    <path d="M10.585 10.587a2 2 0 0 0 2.829 2.828" />
-    <path d="M16.681 16.673a8.717 8.717 0 0 1 -4.681 1.327c-3.6 0 -6.6 -2 -9 -6c1.272 -2.12 2.712 -3.678 4.32 -4.674m2.86 -1.146a9.055 9.055 0 0 1 1.82 -.18c3.6 0 6.6 2 9 6c-.666 1.11 -1.379 2.067 -2.138 2.87" />
-    <path d="M3 3l18 18" />
-  </g>,
-  tablerIconProps,
-);
-
-export const brainIcon = createIcon(
-  <g stroke="currentColor" fill="none">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-    <path d="M15.5 13a3.5 3.5 0 0 0 -3.5 3.5v1a3.5 3.5 0 0 0 7 0v-1.8" />
-    <path d="M8.5 13a3.5 3.5 0 0 1 3.5 3.5v1a3.5 3.5 0 0 1 -7 0v-1.8" />
-    <path d="M17.5 16a3.5 3.5 0 0 0 0 -7h-.5" />
-    <path d="M19 9.3v-2.8a3.5 3.5 0 0 0 -7 0" />
-    <path d="M6.5 16a3.5 3.5 0 0 1 0 -7h.5" />
-    <path d="M5 9.3v-2.8a3.5 3.5 0 0 1 7 0v10" />
-  </g>,
-  tablerIconProps,
-);
-
-export const searchIcon = createIcon(
-  <g strokeWidth={1.5}>
-    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-    <path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" />
-    <path d="M21 21l-6 -6" />
-  </g>,
-  tablerIconProps,
 );

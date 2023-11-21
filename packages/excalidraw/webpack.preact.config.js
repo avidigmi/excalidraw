@@ -1,3 +1,5 @@
+const { merge } = require("webpack-merge");
+
 const prodConfig = require("./webpack.prod.config");
 const devConfig = require("./webpack.dev.config");
 
@@ -9,7 +11,6 @@ const outputFile = isProd
   : "excalidraw-with-preact.development";
 
 const preactWebpackConfig = {
-  ...config,
   entry: {
     [outputFile]: "./entry.js",
   },
@@ -29,4 +30,4 @@ const preactWebpackConfig = {
     },
   },
 };
-module.exports = preactWebpackConfig;
+module.exports = merge(config, preactWebpackConfig);

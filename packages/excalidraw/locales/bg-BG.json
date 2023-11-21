@@ -11,8 +11,6 @@
     "copyAsPng": "Копиране в клипборда",
     "copyAsSvg": "Копирано в клипборда като SVG",
     "copyText": "",
-    "copySource": "",
-    "convertToCode": "",
     "bringForward": "Преместване напред",
     "sendToBack": "Изнасяне назад",
     "bringToFront": "Изнасяне отпред",
@@ -38,12 +36,8 @@
     "arrowhead_none": "Без",
     "arrowhead_arrow": "Стрелка",
     "arrowhead_bar": "Връх на стрелката",
-    "arrowhead_circle": "",
-    "arrowhead_circle_outline": "",
+    "arrowhead_dot": "Точка",
     "arrowhead_triangle": "Триъгълник",
-    "arrowhead_triangle_outline": "",
-    "arrowhead_diamond": "",
-    "arrowhead_diamond_outline": "",
     "fontSize": "Размер на шрифта",
     "fontFamily": "Семейство шрифтове",
     "addWatermark": "Добави \"Направено с Excalidraw\"",
@@ -136,9 +130,7 @@
     "sidebarLock": "",
     "selectAllElementsInFrame": "",
     "removeAllElementsFromFrame": "",
-    "eyeDropper": "Избери цвят от платното",
-    "textToDiagram": "",
-    "prompt": ""
+    "eyeDropper": "Избери цвят от платното"
   },
   "library": {
     "noItems": "Няма добавени неща все още...",
@@ -217,7 +209,6 @@
     "importLibraryError": "Не можем да заредим библиотеката",
     "collabSaveFailed": "",
     "collabSaveFailed_sizeExceeded": "",
-    "imageToolNotSupported": "",
     "brave_measure_text_error": {
       "line1": "",
       "line2": "",
@@ -226,12 +217,8 @@
     },
     "libraryElementTypeError": {
       "embeddable": "",
-      "iframe": "",
       "image": ""
-    },
-    "asyncPasteFailedOnRead": "",
-    "asyncPasteFailedOnParse": "",
-    "copyToSystemClipboardFailed": ""
+    }
   },
   "toolBar": {
     "selection": "Селекция",
@@ -249,13 +236,10 @@
     "link": "",
     "eraser": "Гума",
     "frame": "",
-    "magicframe": "",
     "embeddable": "",
     "laser": "",
     "hand": "",
-    "extraTools": "Още инструменти",
-    "mermaidToExcalidraw": "",
-    "magicSettings": ""
+    "extraTools": "Още инструменти"
   },
   "headings": {
     "canvasActions": "Действия по платното",
@@ -514,12 +498,5 @@
         "description": ""
       }
     }
-  },
-  "mermaid": {
-    "title": "",
-    "button": "",
-    "description": "",
-    "syntax": "",
-    "preview": ""
   }
 }

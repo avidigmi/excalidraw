@@ -1,12 +1,7 @@
 import clsx from "clsx";
 import React from "react";
 import { ActionManager } from "../actions/manager";
-import {
-  CLASSES,
-  DEFAULT_SIDEBAR,
-  LIBRARY_SIDEBAR_WIDTH,
-  TOOL_TYPE,
-} from "../constants";
+import { CLASSES, DEFAULT_SIDEBAR, LIBRARY_SIDEBAR_WIDTH } from "../constants";
 import { showSelectedShapeActions } from "../element";
 import { NonDeletedExcalidrawElement } from "../element/types";
 import { Language, t } from "../i18n";
@@ -37,7 +32,7 @@ import { UserList } from "./UserList";
 import { JSONExportDialog } from "./JSONExportDialog";
 import { PenModeButton } from "./PenModeButton";
 import { trackEvent } from "../analytics";
-import { useDevice } from "./App";
+import { useDevice } from "../components/App";
 import { Stats } from "./Stats";
 import { actionToggleStats } from "../actions/actionToggleStats";
 import Footer from "./footer/Footer";
@@ -61,8 +56,6 @@ import { mutateElement } from "../element/mutateElement";
 import { ShapeCache } from "../scene/ShapeCache";
 import Scene from "../scene/Scene";
 import { LaserPointerButton } from "./LaserTool/LaserPointerButton";
-import { MagicSettings } from "./MagicSettings";
-import { TTDDialog } from "./TTDDialog/TTDDialog";
 
 interface LayerUIProps {
   actionManager: ActionManager;
@@ -84,14 +77,6 @@ interface LayerUIProps {
   children?: React.ReactNode;
   app: AppClassProperties;
   isCollaborating: boolean;
-  openAIKey: string | null;
-  isOpenAIKeyPersisted: boolean;
-  onOpenAIAPIKeyChange: (apiKey: string, shouldPersist: boolean) => void;
-  onMagicSettingsConfirm: (
-    apiKey: string,
-    shouldPersist: boolean,
-    source: "tool" | "generation" | "settings",
-  ) => void;
 }
 
 const DefaultMainMenu: React.FC<{
@@ -148,10 +133,6 @@ const LayerUI = ({
   children,
   app,
   isCollaborating,
-  openAIKey,
-  isOpenAIKeyPersisted,
-  onOpenAIAPIKeyChange,
-  onMagicSettingsConfirm,
 }: LayerUIProps) => {
   const device = useDevice();
   const tunnels = useInitializeTunnels();
@@ -182,7 +163,7 @@ const LayerUI = ({
   const renderImageExportDialog = () => {
     if (
       !UIOptions.canvasActions.saveAsImage ||
-      appState.openDialog?.name !== "imageExport"
+      appState.openDialog !== "imageExport"
     ) {
       return null;
     }
@@ -314,11 +295,9 @@ const LayerUI = ({
                         >
                           <LaserPointerButton
                             title={t("toolBar.laser")}
-                            checked={
-                              appState.activeTool.type === TOOL_TYPE.laser
-                            }
+                            checked={appState.activeTool.type === "laser"}
                             onChange={() =>
-                              app.setActiveTool({ type: TOOL_TYPE.laser })
+                              app.setActiveTool({ type: "laser" })
                             }
                             isMobile
                           />
@@ -338,12 +317,7 @@ const LayerUI = ({
               },
             )}
           >
-            {appState.collaborators.size > 0 && (
-              <UserList
-                collaborators={appState.collaborators}
-                userToFollow={appState.userToFollow?.socketId || null}
-              />
-            )}
+            <UserList collaborators={appState.collaborators} />
             {renderTopRightUI?.(device.editor.isMobile, appState)}
             {!appState.viewModeEnabled &&
               // hide button when sidebar docked
@@ -402,7 +376,6 @@ const LayerUI = ({
         {t("toolBar.library")}
       </DefaultSidebar.Trigger>
       <DefaultOverwriteConfirmDialog />
-      {appState.openDialog?.name === "ttd" && <TTDDialog __fallback />}
       {/* ------------------------------------------------------------------ */}
 
       {appState.isLoading && <LoadingMessage delay={250} />}
@@ -459,27 +432,8 @@ const LayerUI = ({
           }}
         />
       )}
-      {appState.openDialog?.name === "help" && (
+      {appState.openDialog === "help" && (
         <HelpDialog
-          onClose={() => {
-            setAppState({ openDialog: null });
-          }}
-        />
-      )}
-      {appState.openDialog?.name === "settings" && (
-        <MagicSettings
-          openAIKey={openAIKey}
-          isPersisted={isOpenAIKeyPersisted}
-          onChange={onOpenAIAPIKeyChange}
-          onConfirm={(apiKey, shouldPersist) => {
-            const source =
-              appState.openDialog?.name === "settings"
-                ? appState.openDialog?.source
-                : "settings";
-            setAppState({ openDialog: null }, () => {
-              onMagicSettingsConfirm(apiKey, shouldPersist, source);
-            });
-          }}
           onClose={() => {
             setAppState({ openDialog: null });
           }}

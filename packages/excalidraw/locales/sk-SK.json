@@ -11,8 +11,6 @@
     "copyAsPng": "Kopírovať do schránky ako PNG",
     "copyAsSvg": "Kopírovať do schránky ako SVG",
     "copyText": "Kopírovať do schránky ako text",
-    "copySource": "Kopírovať kód do schránky",
-    "convertToCode": "Konvertovať na kód",
     "bringForward": "Presunúť o úroveň dopredu",
     "sendToBack": "Presunúť dozadu",
     "bringToFront": "Presunúť dopredu",
@@ -38,12 +36,8 @@
     "arrowhead_none": "Žiadne",
     "arrowhead_arrow": "Šípka",
     "arrowhead_bar": "Čiara",
-    "arrowhead_circle": "Kruh",
-    "arrowhead_circle_outline": "Kruh (obrys)",
+    "arrowhead_dot": "Bod",
     "arrowhead_triangle": "Trojuholník",
-    "arrowhead_triangle_outline": "Trojuholník (obrys)",
-    "arrowhead_diamond": "Diamant",
-    "arrowhead_diamond_outline": "Diamant (obrys)",
     "fontSize": "Veľkosť písma",
     "fontFamily": "Písmo",
     "addWatermark": "Pridať \"Vytvorené s Excalidraw\"",
@@ -136,9 +130,7 @@
     "sidebarLock": "Nechať bočný panel otvorený",
     "selectAllElementsInFrame": "Vybrať všetky prvky v ráme",
     "removeAllElementsFromFrame": "Odstrániť všetky prvky z rámu",
-    "eyeDropper": "Vybrať farbu z plátna",
-    "textToDiagram": "Text na diagram",
-    "prompt": "Inštrukcia"
+    "eyeDropper": "Vybrať farbu z plátna"
   },
   "library": {
     "noItems": "Zatiaľ neboli pridané žiadne položky...",
@@ -211,13 +203,12 @@
     "imageInsertError": "Nepodarilo sa vložiť obrázok. Skúste to znova neskôr...",
     "fileTooBig": "Súbor je príliš veľký. Maximálna povolená veľkosť je {{maxSize}}.",
     "svgImageInsertError": "Nepodarilo sa vložiť SVG obrázok. SVG formát je pravdepodobne nevalidný.",
-    "failedToFetchImage": "Načítanie obrázka zlyhalo.",
+    "failedToFetchImage": "",
     "invalidSVGString": "Nevalidné SVG.",
     "cannotResolveCollabServer": "Nepodarilo sa pripojiť ku kolaboračnému serveru. Prosím obnovte stránku a skúste to znovu.",
     "importLibraryError": "Nepodarilo sa načítať knižnicu",
     "collabSaveFailed": "Uloženie do databázy sa nepodarilo. Ak tento problém pretrváva uložte si váš súbor lokálne aby ste nestratili vašu prácu.",
     "collabSaveFailed_sizeExceeded": "Uloženie do databázy sa nepodarilo, pretože veľkosť plátna je príliš veľká. Uložte si váš súbor lokálne aby ste nestratili vašu prácu.",
-    "imageToolNotSupported": "Obrázky sú vypnuté.",
     "brave_measure_text_error": {
       "line1": "Vyzerá to, že používate prehliadač Brave so zapnutým nastavením pre <bold>agresívne blokovanie</bold>.",
       "line2": "To môže spôsobiť nesprávne zobrazenie <bold>textových prvkov</bold> vo vašej kresbe.",
@@ -226,12 +217,8 @@
     },
     "libraryElementTypeError": {
       "embeddable": "Zapustené prvky nie je možné pridať do knižnice.",
-      "iframe": "Vložené rámce IFrame nie je možné pridať do knižnice.",
       "image": "Podpora pre pridávanie obrázkov do knižnice bude dostupná už čoskoro!"
-    },
-    "asyncPasteFailedOnRead": "Vloženie sa nepodarilo (nebolo možné prečítať obsah schránky).",
-    "asyncPasteFailedOnParse": "Vloženie sa nepodarilo.",
-    "copyToSystemClipboardFailed": "Kopírovanie do schránky sa nepodarilo."
+    }
   },
   "toolBar": {
     "selection": "Výber",
@@ -249,13 +236,10 @@
     "link": "Pridať/ Upraviť odkaz pre vybraný tvar",
     "eraser": "Guma",
     "frame": "Nástroj rám",
-    "magicframe": "Drôtený model na kód",
     "embeddable": "Web Embed",
-    "laser": "Laserový ukazovateľ",
+    "laser": "",
     "hand": "Ruka (nástroj pre pohyb plátna)",
-    "extraTools": "Ďalšie nástroje",
-    "mermaidToExcalidraw": "Mermaid do Excalidraw",
-    "magicSettings": "AI nastavenia"
+    "extraTools": "Ďalšie nástroje"
   },
   "headings": {
     "canvasActions": "Akcie plátna",
@@ -514,12 +498,5 @@
         "description": "Načítanie externej kresby <bold>nahradí váš existujúci obsah</bold>.<br></br>Vašu kresbu môžete zálohovať jednou z nižšie uvedených možností."
       }
     }
-  },
-  "mermaid": {
-    "title": "Mermaid do Excalidraw",
-    "button": "Vložiť",
-    "description": "Aktuálne sú podporované iba <flowchartLink>vývojové diagramy</flowchartLink>, <sequenceLink>sekvenčné diagramy</sequenceLink> a <classLink>diagramy tried</classLink>. Ostatné typy budú v Excalidraw vykreslené ako obrázky.",
-    "syntax": "Mermaid syntax",
-    "preview": "Ukážka"
   }
 }

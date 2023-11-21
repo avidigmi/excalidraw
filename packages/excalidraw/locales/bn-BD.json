@@ -11,8 +11,6 @@
     "copyAsPng": "পীএনজী ছবির মতন কপি করুন",
     "copyAsSvg": "এসভীজী ছবির মতন কপি করুন",
     "copyText": "লিখিত তথ্যের মতন কপি করুন",
-    "copySource": "",
-    "convertToCode": "",
     "bringForward": "অধিকতর সামনে আনুন",
     "sendToBack": "অধিকতর পিছনে নিয়ে যান",
     "bringToFront": "সবার সামনে আনুন",
@@ -38,12 +36,8 @@
     "arrowhead_none": "কিছু না",
     "arrowhead_arrow": "তীর",
     "arrowhead_bar": "রেখাংশ",
-    "arrowhead_circle": "",
-    "arrowhead_circle_outline": "",
+    "arrowhead_dot": "বিন্দু",
     "arrowhead_triangle": "ত্রিভূজ",
-    "arrowhead_triangle_outline": "",
-    "arrowhead_diamond": "",
-    "arrowhead_diamond_outline": "",
     "fontSize": "লেখনীর মাত্রা",
     "fontFamily": "লেখনীর হরফ",
     "addWatermark": "এক্সক্যালিড্র দ্বারা প্রস্তুত",
@@ -136,9 +130,7 @@
     "sidebarLock": "লক",
     "selectAllElementsInFrame": "",
     "removeAllElementsFromFrame": "",
-    "eyeDropper": "",
-    "textToDiagram": "",
-    "prompt": ""
+    "eyeDropper": ""
   },
   "library": {
     "noItems": "সংগ্রহে কিছু যোগ করা হয়নি",
@@ -217,7 +209,6 @@
     "importLibraryError": "সংগ্রহ লোড করা যায়নি",
     "collabSaveFailed": "",
     "collabSaveFailed_sizeExceeded": "",
-    "imageToolNotSupported": "",
     "brave_measure_text_error": {
       "line1": "",
       "line2": "",
@@ -226,12 +217,8 @@
     },
     "libraryElementTypeError": {
       "embeddable": "",
-      "iframe": "",
       "image": ""
-    },
-    "asyncPasteFailedOnRead": "",
-    "asyncPasteFailedOnParse": "",
-    "copyToSystemClipboardFailed": ""
+    }
   },
   "toolBar": {
     "selection": "বাছাই",
@@ -249,13 +236,10 @@
     "link": "একটি নির্বাচিত আকৃতির জন্য লিঙ্ক যোগ বা আপডেট করুন",
     "eraser": "ঝাড়ন",
     "frame": "",
-    "magicframe": "",
     "embeddable": "",
     "laser": "",
     "hand": "",
-    "extraTools": "",
-    "mermaidToExcalidraw": "",
-    "magicSettings": ""
+    "extraTools": ""
   },
   "headings": {
     "canvasActions": "ক্যানভাস কার্যকলাপ",
@@ -514,12 +498,5 @@
         "description": ""
       }
     }
-  },
-  "mermaid": {
-    "title": "",
-    "button": "",
-    "description": "",
-    "syntax": "",
-    "preview": ""
   }
 }

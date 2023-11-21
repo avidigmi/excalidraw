@@ -11,8 +11,6 @@
     "copyAsPng": "Zkopírovat do schránky jako PNG",
     "copyAsSvg": "Zkopírovat do schránky jako SVG",
     "copyText": "Zkopírovat do schránky jako text",
-    "copySource": "",
-    "convertToCode": "",
     "bringForward": "Přenést blíž",
     "sendToBack": "Přenést do pozadí",
     "bringToFront": "Přenést do popředí",
@@ -38,12 +36,8 @@
     "arrowhead_none": "Žádný",
     "arrowhead_arrow": "Šipka",
     "arrowhead_bar": "Kóta",
-    "arrowhead_circle": "",
-    "arrowhead_circle_outline": "",
+    "arrowhead_dot": "Tečka",
     "arrowhead_triangle": "Trojúhelník",
-    "arrowhead_triangle_outline": "",
-    "arrowhead_diamond": "",
-    "arrowhead_diamond_outline": "",
     "fontSize": "Velikost písma",
     "fontFamily": "Písmo",
     "addWatermark": "Přidat \"Vyrobeno s Excalidraw\"",
@@ -136,9 +130,7 @@
     "sidebarLock": "Ponechat postranní panel otevřený",
     "selectAllElementsInFrame": "",
     "removeAllElementsFromFrame": "",
-    "eyeDropper": "Vyberte barvu z plátna",
-    "textToDiagram": "",
-    "prompt": ""
+    "eyeDropper": "Vyberte barvu z plátna"
   },
   "library": {
     "noItems": "Dosud neexistují žádné položky...",
@@ -217,7 +209,6 @@
     "importLibraryError": "Nelze načíst knihovnu",
     "collabSaveFailed": "Nelze uložit do databáze na serveru. Pokud problémy přetrvávají, měli byste uložit soubor lokálně, abyste se ujistili, že neztratíte svou práci.",
     "collabSaveFailed_sizeExceeded": "Nelze uložit do databáze na serveru, plátno se zdá být příliš velké. Měli byste uložit soubor lokálně, abyste se ujistili, že neztratíte svou práci.",
-    "imageToolNotSupported": "",
     "brave_measure_text_error": {
       "line1": "Vypadá to, že používáte Brave prohlížeč s povoleným nastavením <bold>Aggressively Block Fingerprinting</bold>.",
       "line2": "To by mohlo vést k narušení <bold>Textových elementů</bold> ve vašich výkresech.",
@@ -226,12 +217,8 @@
     },
     "libraryElementTypeError": {
       "embeddable": "",
-      "iframe": "",
       "image": ""
-    },
-    "asyncPasteFailedOnRead": "",
-    "asyncPasteFailedOnParse": "",
-    "copyToSystemClipboardFailed": ""
+    }
   },
   "toolBar": {
     "selection": "Výběr",
@@ -249,13 +236,10 @@
     "link": "Přidat/aktualizovat odkaz pro vybraný tvar",
     "eraser": "Guma",
     "frame": "",
-    "magicframe": "",
     "embeddable": "",
     "laser": "",
     "hand": "Ruka (nástroj pro posouvání)",
-    "extraTools": "",
-    "mermaidToExcalidraw": "",
-    "magicSettings": ""
+    "extraTools": ""
   },
   "headings": {
     "canvasActions": "Akce plátna",
@@ -514,12 +498,5 @@
         "description": ""
       }
     }
-  },
-  "mermaid": {
-    "title": "",
-    "button": "",
-    "description": "",
-    "syntax": "",
-    "preview": ""
   }
 }

@@ -20,7 +20,7 @@ import {
   hasBoundTextElement,
   canApplyRoundnessTypeToElement,
   getDefaultRoundnessTypeForElement,
-  isFrameLikeElement,
+  isFrameElement,
   isArrowElement,
 } from "../element/typeChecks";
 import { getSelectedElements } from "../scene";
@@ -138,7 +138,7 @@ export const actionPasteStyles = register({
             });
           }
 
-          if (isFrameLikeElement(element)) {
+          if (isFrameElement(element)) {
             newElement = newElementWith(newElement, {
               roundness: null,
               backgroundColor: "transparent",

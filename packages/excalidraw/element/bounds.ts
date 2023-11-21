@@ -9,11 +9,10 @@ import {
 import { distance2d, rotate, rotatePoint } from "../math";
 import rough from "roughjs/bin/rough";
 import { Drawable, Op } from "roughjs/bin/core";
-import { AppState, Point } from "../types";
+import { Point } from "../types";
 import { generateRoughOptions } from "../scene/Shape";
 import {
   isArrowElement,
-  isBoundToContainer,
   isFreeDrawElement,
   isLinearElement,
   isTextElement,
@@ -23,7 +22,6 @@ import { getBoundTextElement, getContainerElement } from "./textElement";
 import { LinearElementEditor } from "./linearElementEditor";
 import { Mutable } from "../utility-types";
 import { ShapeCache } from "../scene/ShapeCache";
-import Scene from "../scene/Scene";
 
 export type RectangleBox = {
   x: number;
@@ -35,21 +33,12 @@ export type RectangleBox = {
 
 type MaybeQuadraticSolution = [number | null, number | null] | false;
 
-/**
- * x and y position of top left corner, x and y position of bottom right corner
- */
+// x and y position of top left corner, x and y position of bottom right corner
 export type Bounds = readonly [
   minX: number,
   minY: number,
   maxX: number,
   maxY: number,
-];
-
-export type SceneBounds = readonly [
-  sceneX: number,
-  sceneY: number,
-  sceneX2: number,
-  sceneY2: number,
 ];
 
 export class ElementBounds {
@@ -64,29 +53,16 @@ export class ElementBounds {
   static getBounds(element: ExcalidrawElement) {
     const cachedBounds = ElementBounds.boundsCache.get(element);
 
-    if (
-      cachedBounds?.version &&
-      cachedBounds.version === element.version &&
-      // we don't invalidate cache when we update containers and not labels,
-      // which is causing problems down the line. Fix TBA.
-      !isBoundToContainer(element)
-    ) {
+    if (cachedBounds?.version && cachedBounds.version === element.version) {
       return cachedBounds.bounds;
     }
 
     const bounds = ElementBounds.calculateBounds(element);
 
-    // hack to ensure that downstream checks could retrieve element Scene
-    // so as to have correctly calculated bounds
-    // FIXME remove when we get rid of all the id:Scene / element:Scene mapping
-    const shouldCache = Scene.getScene(element);
-
-    if (shouldCache) {
-      ElementBounds.boundsCache.set(element, {
-        version: element.version,
-        bounds,
-      });
-    }
+    ElementBounds.boundsCache.set(element, {
+      version: element.version,
+      bounds,
+    });
 
     return bounds;
   }
@@ -493,31 +469,6 @@ const getFreeDrawElementAbsoluteCoords = (
   return [x1, y1, x2, y2, (x1 + x2) / 2, (y1 + y2) / 2];
 };
 
-/** @returns number in pixels */
-export const getArrowheadSize = (arrowhead: Arrowhead): number => {
-  switch (arrowhead) {
-    case "arrow":
-      return 25;
-    case "diamond":
-    case "diamond_outline":
-      return 12;
-    default:
-      return 15;
-  }
-};
-
-/** @returns number in degrees */
-export const getArrowheadAngle = (arrowhead: Arrowhead): number => {
-  switch (arrowhead) {
-    case "bar":
-      return 90;
-    case "arrow":
-      return 20;
-    default:
-      return 25;
-  }
-};
-
 export const getArrowheadPoints = (
   element: ExcalidrawLinearElement,
   shape: Drawable[],
@@ -570,82 +521,53 @@ export const getArrowheadPoints = (
   const nx = (x2 - x1) / distance;
   const ny = (y2 - y1) / distance;
 
-  const size = getArrowheadSize(arrowhead);
+  const size = {
+    arrow: 30,
+    bar: 15,
+    dot: 15,
+    triangle: 15,
+  }[arrowhead]; // pixels (will differ for each arrowhead)
 
   let length = 0;
 
-  {
+  if (arrowhead === "arrow") {
     // Length for -> arrows is based on the length of the last section
-    const [cx, cy] =
-      position === "end"
-        ? element.points[element.points.length - 1]
-        : element.points[0];
+    const [cx, cy] = element.points[element.points.length - 1];
     const [px, py] =
       element.points.length > 1
-        ? position === "end"
-          ? element.points[element.points.length - 2]
-          : element.points[1]
+        ? element.points[element.points.length - 2]
         : [0, 0];
 
     length = Math.hypot(cx - px, cy - py);
+  } else {
+    // Length for other arrowhead types is based on the total length of the line
+    for (let i = 0; i < element.points.length; i++) {
+      const [px, py] = element.points[i - 1] || [0, 0];
+      const [cx, cy] = element.points[i];
+      length += Math.hypot(cx - px, cy - py);
+    }
   }
 
   // Scale down the arrowhead until we hit a certain size so that it doesn't look weird.
   // This value is selected by minimizing a minimum size with the last segment of the arrowhead
-  const lengthMultiplier =
-    arrowhead === "diamond" || arrowhead === "diamond_outline" ? 0.25 : 0.5;
-  const minSize = Math.min(size, length * lengthMultiplier);
+  const minSize = Math.min(size, length / 2);
   const xs = x2 - nx * minSize;
   const ys = y2 - ny * minSize;
 
-  if (
-    arrowhead === "dot" ||
-    arrowhead === "circle" ||
-    arrowhead === "circle_outline"
-  ) {
-    const diameter = Math.hypot(ys - y2, xs - x2) + element.strokeWidth - 2;
-    return [x2, y2, diameter];
+  if (arrowhead === "dot") {
+    const r = Math.hypot(ys - y2, xs - x2) + element.strokeWidth;
+    return [x2, y2, r];
   }
 
-  const angle = getArrowheadAngle(arrowhead);
+  const angle = {
+    arrow: 20,
+    bar: 90,
+    triangle: 25,
+  }[arrowhead]; // degrees
 
   // Return points
   const [x3, y3] = rotate(xs, ys, x2, y2, (-angle * Math.PI) / 180);
   const [x4, y4] = rotate(xs, ys, x2, y2, (angle * Math.PI) / 180);
-
-  if (arrowhead === "diamond" || arrowhead === "diamond_outline") {
-    // point opposite to the arrowhead point
-    let ox;
-    let oy;
-
-    if (position === "start") {
-      const [px, py] = element.points.length > 1 ? element.points[1] : [0, 0];
-
-      [ox, oy] = rotate(
-        x2 + minSize * 2,
-        y2,
-        x2,
-        y2,
-        Math.atan2(py - y2, px - x2),
-      );
-    } else {
-      const [px, py] =
-        element.points.length > 1
-          ? element.points[element.points.length - 2]
-          : [0, 0];
-
-      [ox, oy] = rotate(
-        x2 - minSize * 2,
-        y2,
-        x2,
-        y2,
-        Math.atan2(y2 - py, x2 - px),
-      );
-    }
-
-    return [x2, y2, x3, y3, ox, oy, x4, y4];
-  }
-
   return [x2, y2, x3, y3, x4, y4];
 };
 
@@ -887,22 +809,4 @@ export const getCommonBoundingBox = (
     midX: (minX + maxX) / 2,
     midY: (minY + maxY) / 2,
   };
-};
-
-/**
- * returns scene coords of user's editor viewport (visible canvas area) bounds
- */
-export const getVisibleSceneBounds = ({
-  scrollX,
-  scrollY,
-  width,
-  height,
-  zoom,
-}: AppState): SceneBounds => {
-  return [
-    -scrollX,
-    -scrollY,
-    -scrollX + width / zoom.value,
-    -scrollY + height / zoom.value,
-  ];
 };

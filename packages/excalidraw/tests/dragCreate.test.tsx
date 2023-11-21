@@ -1,5 +1,5 @@
 import ReactDOM from "react-dom";
-import { Excalidraw } from "../index";
+import { Excalidraw } from "../packages/excalidraw/index";
 import * as Renderer from "../renderer/renderScene";
 import { KEYS } from "../keys";
 import {

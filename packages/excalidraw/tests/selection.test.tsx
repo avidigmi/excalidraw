@@ -6,7 +6,7 @@ import {
   restoreOriginalGetBoundingClientRect,
   assertSelectedElements,
 } from "./test-utils";
-import { Excalidraw } from "../index";
+import { Excalidraw } from "../packages/excalidraw/index";
 import * as Renderer from "../renderer/renderScene";
 import { KEYS } from "../keys";
 import { reseed } from "../random";

@@ -11,8 +11,6 @@
     "copyAsPng": "Kopier til PNG",
     "copyAsSvg": "Kopier til utklippstavlen som SVG",
     "copyText": "Kopier til utklippstavlen som tekst",
-    "copySource": "",
-    "convertToCode": "",
     "bringForward": "Flytt framover",
     "sendToBack": "Send bakerst",
     "bringToFront": "Flytt forrest",
@@ -38,12 +36,8 @@
     "arrowhead_none": "Ingen",
     "arrowhead_arrow": "Pil",
     "arrowhead_bar": "Søyle",
-    "arrowhead_circle": "",
-    "arrowhead_circle_outline": "",
+    "arrowhead_dot": "Prikk",
     "arrowhead_triangle": "Trekant",
-    "arrowhead_triangle_outline": "",
-    "arrowhead_diamond": "",
-    "arrowhead_diamond_outline": "",
     "fontSize": "Skriftstørrelse",
     "fontFamily": "Fontfamilie",
     "addWatermark": "Legg til \"Laget med Excalidraw\"",
@@ -136,9 +130,7 @@
     "sidebarLock": "Holde sidemenyen åpen",
     "selectAllElementsInFrame": "Velg alle elementene i rammen",
     "removeAllElementsFromFrame": "Fjern alle elementer fra rammen",
-    "eyeDropper": "Velg farge fra lerretet",
-    "textToDiagram": "",
-    "prompt": ""
+    "eyeDropper": "Velg farge fra lerretet"
   },
   "library": {
     "noItems": "Ingen elementer lagt til ennå...",
@@ -217,7 +209,6 @@
     "importLibraryError": "Kunne ikke laste bibliotek",
     "collabSaveFailed": "Kan ikke lagre i backend-databasen. Hvis problemer vedvarer, bør du lagre filen lokalt for å sikre at du ikke mister arbeidet.",
     "collabSaveFailed_sizeExceeded": "Kunne ikke lagre til backend-databasen, lerretet ser ut til å være for stort. Du bør lagre filen lokalt for å sikre at du ikke mister arbeidet ditt.",
-    "imageToolNotSupported": "",
     "brave_measure_text_error": {
       "line1": "Ser ut som om du bruker Brave nettleser med <bold>Aggressivt Block Finger</bold> -innstillingen aktivert.",
       "line2": "Dette kan resultere i å bryte <bold>tekst-elementene</bold> i tegningene.",
@@ -226,12 +217,8 @@
     },
     "libraryElementTypeError": {
       "embeddable": "Innebygde elementer kan ikke legges til i biblioteket.",
-      "iframe": "",
       "image": "Støtte for å legge til bilder i biblioteket kommer snart!"
-    },
-    "asyncPasteFailedOnRead": "",
-    "asyncPasteFailedOnParse": "",
-    "copyToSystemClipboardFailed": ""
+    }
   },
   "toolBar": {
     "selection": "Velg",
@@ -249,13 +236,10 @@
     "link": "Legg til / oppdater link for en valgt figur",
     "eraser": "Viskelær",
     "frame": "Rammeverktøy",
-    "magicframe": "",
     "embeddable": "Nettinnbygging",
     "laser": "",
     "hand": "Hånd (panoreringsverktøy)",
-    "extraTools": "Flere verktøy",
-    "mermaidToExcalidraw": "",
-    "magicSettings": ""
+    "extraTools": "Flere verktøy"
   },
   "headings": {
     "canvasActions": "Handlinger: lerret",
@@ -514,12 +498,5 @@
         "description": "Lasting av ekstern tegning vil <bold>erstatte ditt eksisterende innhold</bold>.<br></br>Du kan sikkerhetskopiere tegningen din først ved å bruke en av valgene nedenfor."
       }
     }
-  },
-  "mermaid": {
-    "title": "",
-    "button": "",
-    "description": "",
-    "syntax": "",
-    "preview": ""
   }
 }

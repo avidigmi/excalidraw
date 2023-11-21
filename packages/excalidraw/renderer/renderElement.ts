@@ -13,14 +13,13 @@ import {
   isInitializedImageElement,
   isArrowElement,
   hasBoundTextElement,
-  isMagicFrameElement,
 } from "../element/typeChecks";
 import { getElementAbsoluteCoords } from "../element/bounds";
 import type { RoughCanvas } from "roughjs/bin/canvas";
 import type { Drawable } from "roughjs/bin/core";
 import type { RoughSVG } from "roughjs/bin/svg";
 
-import { SVGRenderConfig, StaticCanvasRenderConfig } from "../scene/types";
+import { StaticCanvasRenderConfig } from "../scene/types";
 import {
   distance,
   getFontString,
@@ -273,7 +272,6 @@ const drawElementOnCanvas = (
     ((getContainingFrame(element)?.opacity ?? 100) * element.opacity) / 10000;
   switch (element.type) {
     case "rectangle":
-    case "iframe":
     case "embeddable":
     case "diamond":
     case "ellipse": {
@@ -596,7 +594,6 @@ export const renderElement = (
   appState: StaticCanvasAppState,
 ) => {
   switch (element.type) {
-    case "magicframe":
     case "frame": {
       if (appState.frameRendering.enabled && appState.frameRendering.outline) {
         context.save();
@@ -608,12 +605,6 @@ export const renderElement = (
 
         context.lineWidth = FRAME_STYLE.strokeWidth / appState.zoom.value;
         context.strokeStyle = FRAME_STYLE.strokeColor;
-
-        // TODO change later to only affect AI frames
-        if (isMagicFrameElement(element)) {
-          context.strokeStyle =
-            appState.theme === "light" ? "#7affd7" : "#1d8264";
-        }
 
         if (FRAME_STYLE.radius && context.roundRect) {
           context.beginPath();
@@ -638,7 +629,7 @@ export const renderElement = (
       // TODO investigate if we can do this in situ. Right now we need to call
       // beforehand because math helpers (such as getElementAbsoluteCoords)
       // rely on existing shapes
-      ShapeCache.generateElementShape(element, null);
+      ShapeCache.generateElementShape(element);
 
       if (renderConfig.isExporting) {
         const [x1, y1, x2, y2] = getElementAbsoluteCoords(element);
@@ -675,12 +666,11 @@ export const renderElement = (
     case "arrow":
     case "image":
     case "text":
-    case "iframe":
     case "embeddable": {
       // TODO investigate if we can do this in situ. Right now we need to call
       // beforehand because math helpers (such as getElementAbsoluteCoords)
       // rely on existing shapes
-      ShapeCache.generateElementShape(element, renderConfig);
+      ShapeCache.generateElementShape(element, renderConfig.isExporting);
       if (renderConfig.isExporting) {
         const [x1, y1, x2, y2] = getElementAbsoluteCoords(element);
         const cx = (x1 + x2) / 2 + appState.scrollX;
@@ -876,7 +866,11 @@ export const renderElementToSvg = (
   files: BinaryFiles,
   offsetX: number,
   offsetY: number,
-  renderConfig: SVGRenderConfig,
+  renderConfig: {
+    exportWithDarkMode: boolean;
+    renderEmbeddables: boolean;
+    frameRendering: AppState["frameRendering"];
+  },
 ) => {
   const offset = { x: offsetX, y: offsetY };
   const [x1, y1, x2, y2] = getElementAbsoluteCoords(element);
@@ -929,7 +923,7 @@ export const renderElementToSvg = (
     case "rectangle":
     case "diamond":
     case "ellipse": {
-      const shape = ShapeCache.generateElementShape(element, null);
+      const shape = ShapeCache.generateElementShape(element);
       const node = roughSVGDrawWithPrecision(
         rsvg,
         shape,
@@ -957,10 +951,9 @@ export const renderElementToSvg = (
       addToRoot(g || node, element);
       break;
     }
-    case "iframe":
     case "embeddable": {
       // render placeholder rectangle
-      const shape = ShapeCache.generateElementShape(element, renderConfig);
+      const shape = ShapeCache.generateElementShape(element, true);
       const node = roughSVGDrawWithPrecision(
         rsvg,
         shape,
@@ -1109,7 +1102,7 @@ export const renderElementToSvg = (
       }
       group.setAttribute("stroke-linecap", "round");
 
-      const shapes = ShapeCache.generateElementShape(element, renderConfig);
+      const shapes = ShapeCache.generateElementShape(element);
       shapes.forEach((shape) => {
         const node = roughSVGDrawWithPrecision(
           rsvg,
@@ -1152,10 +1145,7 @@ export const renderElementToSvg = (
       break;
     }
     case "freedraw": {
-      const backgroundFillShape = ShapeCache.generateElementShape(
-        element,
-        renderConfig,
-      );
+      const backgroundFillShape = ShapeCache.generateElementShape(element);
       const node = backgroundFillShape
         ? roughSVGDrawWithPrecision(
             rsvg,
@@ -1262,8 +1252,7 @@ export const renderElementToSvg = (
       break;
     }
     // frames are not rendered and only acts as a container
-    case "frame":
-    case "magicframe": {
+    case "frame": {
       if (
         renderConfig.frameRendering.enabled &&
         renderConfig.frameRendering.outline

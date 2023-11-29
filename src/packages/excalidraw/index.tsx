@@ -14,7 +14,6 @@ import { jotaiScope, jotaiStore } from "../../jotai";
 import Footer from "../../components/footer/FooterCenter";
 import MainMenu from "../../components/main-menu/MainMenu";
 import WelcomeScreen from "../../components/welcome-screen/WelcomeScreen";
-import LiveCollaborationTrigger from "../../components/live-collaboration/LiveCollaborationTrigger";
 
 const ExcalidrawBase = (props: ExcalidrawProps) => {
   const {
@@ -241,7 +240,6 @@ export { Footer };
 export { MainMenu };
 export { useDevice } from "../../components/App";
 export { WelcomeScreen };
-export { LiveCollaborationTrigger };
 
 export { DefaultSidebar } from "../../components/DefaultSidebar";
 

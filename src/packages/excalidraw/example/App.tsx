@@ -159,7 +159,6 @@ export default function App({ appTitle, useCustom, customArgs }: AppProps) {
         >
           Click me
         </button>
-      </>
     );
   };
 

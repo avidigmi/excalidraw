@@ -74,7 +74,6 @@ const {
   Footer,
   WelcomeScreen,
   MainMenu,
-  LiveCollaborationTrigger,
   convertToExcalidrawElements,
   TTDDialog,
   TTDDialogTrigger,
@@ -156,15 +155,6 @@ export default function App({ appTitle, useCustom, customArgs }: AppProps) {
 
   const renderTopRightUI = (isMobile: boolean) => {
     return (
-      <>
-        {!isMobile && (
-          <LiveCollaborationTrigger
-            isCollaborating={isCollaborating}
-            onSelect={() => {
-              window.alert("Collab dialog clicked");
-            }}
-          />
-        )}
         <button
           onClick={() => alert("This is an empty top right UI")}
           style={{ height: "2.5rem" }}
@@ -510,10 +500,6 @@ export default function App({ appTitle, useCustom, customArgs }: AppProps) {
         <MainMenu.DefaultItems.SaveAsImage />
         <MainMenu.DefaultItems.Export />
         <MainMenu.Separator />
-        <MainMenu.DefaultItems.LiveCollaborationTrigger
-          isCollaborating={isCollaborating}
-          onSelect={() => window.alert("You clicked on collab button")}
-        />
         <MainMenu.Group title="Excalidraw links">
           <MainMenu.DefaultItems.Socials />
         </MainMenu.Group>

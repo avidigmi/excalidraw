@@ -24,7 +24,6 @@ import { t } from "../src/i18n";
 import {
   Excalidraw,
   defaultLang,
-  LiveCollaborationTrigger,
 } from "../src/packages/excalidraw/index";
 import {
   AppState,
@@ -715,12 +714,7 @@ const ExcalidrawWrapper = () => {
           if (isMobile || !collabAPI || isCollabDisabled) {
             return null;
           }
-          return (
-            <LiveCollaborationTrigger
-              isCollaborating={isCollaborating}
-              onSelect={() => setCollabDialogShown(true)}
-            />
-          );
+          return null;
         }}
       >
         <AppMainMenu

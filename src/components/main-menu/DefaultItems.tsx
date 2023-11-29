@@ -277,16 +277,7 @@ export const LiveCollaborationTrigger = ({
 }) => {
   const { t } = useI18n();
   return (
-    <DropdownMenuItem
-      data-testid="collab-button"
-      icon={usersIcon}
-      className={clsx({
-        "active-collab": isCollaborating,
-      })}
-      onSelect={onSelect}
-    >
-      {t("labels.liveCollaboration")}
-    </DropdownMenuItem>
+    <div/>
   );
 };
 

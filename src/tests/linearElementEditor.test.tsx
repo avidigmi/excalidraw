@@ -5,7 +5,7 @@ import {
   ExcalidrawTextElementWithContainer,
   FontString,
 } from "../element/types";
-import { Excalidraw } from "../packages/excalidraw/index";
+import ExcalidrawApp from "../excalidraw-app";
 import { centerPoint } from "../math";
 import { reseed } from "../random";
 import * as Renderer from "../renderer/renderScene";
@@ -16,6 +16,7 @@ import { Point } from "../types";
 import { KEYS } from "../keys";
 import { LinearElementEditor } from "../element/linearElementEditor";
 import { queryByTestId, queryByText } from "@testing-library/react";
+import { resize, rotate } from "./utils";
 import {
   getBoundTextElementPosition,
   wrapText,
@@ -42,7 +43,7 @@ describe("Test Linear Elements", () => {
     renderInteractiveScene.mockClear();
     renderStaticScene.mockClear();
     reseed(7);
-    const comp = await render(<Excalidraw handleKeyboardGlobally={true} />);
+    const comp = await render(<ExcalidrawApp />);
     h.state.width = 1000;
     h.state.height = 1000;
     container = comp.container;
@@ -273,7 +274,7 @@ describe("Test Linear Elements", () => {
 
       // drag line from midpoint
       drag(midpoint, [midpoint[0] + delta, midpoint[1] + delta]);
-      expect(renderInteractiveScene).toHaveBeenCalledTimes(13);
+      expect(renderInteractiveScene).toHaveBeenCalledTimes(14);
       expect(renderStaticScene).toHaveBeenCalledTimes(6);
 
       expect(line.points.length).toEqual(3);
@@ -416,7 +417,7 @@ describe("Test Linear Elements", () => {
           lastSegmentMidpoint[1] + delta,
         ]);
 
-        expect(renderInteractiveScene).toHaveBeenCalledTimes(19);
+        expect(renderInteractiveScene).toHaveBeenCalledTimes(21);
         expect(renderStaticScene).toHaveBeenCalledTimes(9);
 
         expect(line.points.length).toEqual(5);
@@ -519,7 +520,7 @@ describe("Test Linear Elements", () => {
         // delete 3rd point
         deletePoint(points[2]);
         expect(line.points.length).toEqual(3);
-        expect(renderInteractiveScene).toHaveBeenCalledTimes(20);
+        expect(renderInteractiveScene).toHaveBeenCalledTimes(21);
         expect(renderStaticScene).toHaveBeenCalledTimes(9);
 
         const newMidPoints = LinearElementEditor.getEditorMidPoints(
@@ -566,7 +567,7 @@ describe("Test Linear Elements", () => {
           lastSegmentMidpoint[0] + delta,
           lastSegmentMidpoint[1] + delta,
         ]);
-        expect(renderInteractiveScene).toHaveBeenCalledTimes(19);
+        expect(renderInteractiveScene).toHaveBeenCalledTimes(21);
         expect(renderStaticScene).toHaveBeenCalledTimes(9);
         expect(line.points.length).toEqual(5);
 
@@ -938,10 +939,71 @@ describe("Test Linear Elements", () => {
       expect(line.boundElements).toBeNull();
     });
 
-    // TODO fix #7029 and rewrite this test
-    it.todo(
-      "should not rotate the bound text and update position of bound text and bounding box correctly when arrow rotated",
-    );
+    it("should not rotate the bound text and update position of bound text and bounding box correctly when arrow rotated", () => {
+      createThreePointerLinearElement("arrow", {
+        type: ROUNDNESS.PROPORTIONAL_RADIUS,
+      });
+
+      const arrow = h.elements[0] as ExcalidrawLinearElement;
+
+      const { textElement, container } = createBoundTextElement(
+        DEFAULT_TEXT,
+        arrow,
+      );
+
+      expect(container.angle).toBe(0);
+      expect(textElement.angle).toBe(0);
+      expect(getBoundTextElementPosition(arrow, textElement))
+        .toMatchInlineSnapshot(`
+          {
+            "x": 75,
+            "y": 60,
+          }
+        `);
+      expect(textElement.text).toMatchInlineSnapshot(`
+        "Online whiteboard 
+        collaboration made 
+        easy"
+      `);
+      expect(LinearElementEditor.getElementAbsoluteCoords(container, true))
+        .toMatchInlineSnapshot(`
+          [
+            20,
+            20,
+            105,
+            80,
+            55.45893770831013,
+            45,
+          ]
+        `);
+
+      rotate(container, -35, 55);
+      expect(container.angle).toMatchInlineSnapshot(`1.3988061968364685`);
+      expect(textElement.angle).toBe(0);
+      expect(getBoundTextElementPosition(container, textElement))
+        .toMatchInlineSnapshot(`
+          {
+            "x": 21.73926141863671,
+            "y": 73.31003398390868,
+          }
+        `);
+      expect(textElement.text).toMatchInlineSnapshot(`
+        "Online whiteboard 
+        collaboration made 
+        easy"
+      `);
+      expect(LinearElementEditor.getElementAbsoluteCoords(container, true))
+        .toMatchInlineSnapshot(`
+          [
+            20,
+            20,
+            102.41961302274555,
+            86.49012635273976,
+            55.45893770831013,
+            45,
+          ]
+        `);
+    });
 
     it("should resize and position the bound text and bounding box correctly when 3 pointer arrow element resized", () => {
       createThreePointerLinearElement("arrow", {
@@ -980,20 +1042,20 @@ describe("Test Linear Elements", () => {
           ]
         `);
 
-      UI.resize(container, "ne", [300, 200]);
+      resize(container, "ne", [300, 200]);
 
       expect({ width: container.width, height: container.height })
         .toMatchInlineSnapshot(`
           {
             "height": 130,
-            "width": 366.11716195150507,
+            "width": 367,
           }
         `);
 
       expect(getBoundTextElementPosition(container, textElement))
         .toMatchInlineSnapshot(`
           {
-            "x": 271.11716195150507,
+            "x": 272,
             "y": 45,
           }
         `);
@@ -1007,9 +1069,9 @@ describe("Test Linear Elements", () => {
           [
             20,
             35,
-            501.11716195150507,
+            502,
             95,
-            205.4589377083102,
+            205.9061448421403,
             52.5,
           ]
         `);
@@ -1201,30 +1263,6 @@ describe("Test Linear Elements", () => {
           y: 7.5,
         }),
       );
-    });
-
-    it("should not update label position when arrow dragged", () => {
-      createTwoPointerLinearElement("arrow");
-      let arrow = h.elements[0] as ExcalidrawLinearElement;
-      createBoundTextElement(DEFAULT_TEXT, arrow);
-      let label = h.elements[1] as ExcalidrawTextElementWithContainer;
-      expect(arrow.x).toBe(20);
-      expect(arrow.y).toBe(20);
-      expect(label.x).toBe(0);
-      expect(label.y).toBe(0);
-      mouse.reset();
-      mouse.select(arrow);
-      mouse.select(label);
-      mouse.downAt(arrow.x, arrow.y);
-      mouse.moveTo(arrow.x + 20, arrow.y + 30);
-      mouse.up(arrow.x + 20, arrow.y + 30);
-
-      arrow = h.elements[0] as ExcalidrawLinearElement;
-      label = h.elements[1] as ExcalidrawTextElementWithContainer;
-      expect(arrow.x).toBe(80);
-      expect(arrow.y).toBe(100);
-      expect(label.x).toBe(0);
-      expect(label.y).toBe(0);
     });
   });
 });

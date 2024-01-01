@@ -92,10 +92,7 @@ describe("exportToSvg", () => {
     expect(passedOptionsWhenDefault).toMatchSnapshot();
   });
 
-  // FIXME the utils.exportToSvg no longer filters out deleted elements.
-  // It's already supposed to be passed non-deleted elements by we're not
-  // type-checking for it correctly.
-  it.skip("with deleted elements", async () => {
+  it("with deleted elements", async () => {
     await utils.exportToSvg({
       ...diagramFactory({
         overrides: { appState: void 0 },

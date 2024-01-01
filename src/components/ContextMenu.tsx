@@ -9,7 +9,11 @@ import {
 } from "../actions/shortcuts";
 import { Action } from "../actions/types";
 import { ActionManager } from "../actions/manager";
-import { useExcalidrawAppState, useExcalidrawElements } from "./App";
+import {
+  useExcalidrawAppState,
+  useExcalidrawElements,
+  useExcalidrawSetAppState,
+} from "./App";
 import React from "react";
 
 export type ContextMenuItem = typeof CONTEXT_MENU_SEPARATOR | Action;
@@ -21,14 +25,14 @@ type ContextMenuProps = {
   items: ContextMenuItems;
   top: number;
   left: number;
-  onClose: (callback?: () => void) => void;
 };
 
 export const CONTEXT_MENU_SEPARATOR = "separator";
 
 export const ContextMenu = React.memo(
-  ({ actionManager, items, top, left, onClose }: ContextMenuProps) => {
+  ({ actionManager, items, top, left }: ContextMenuProps) => {
     const appState = useExcalidrawAppState();
+    const setAppState = useExcalidrawSetAppState();
     const elements = useExcalidrawElements();
 
     const filteredItems = items.reduce((acc: ContextMenuItem[], item) => {
@@ -50,9 +54,7 @@ export const ContextMenu = React.memo(
 
     return (
       <Popover
-        onCloseRequest={() => {
-          onClose();
-        }}
+        onCloseRequest={() => setAppState({ contextMenu: null })}
         top={top}
         left={left}
         fitInViewport={true}
@@ -100,7 +102,7 @@ export const ContextMenu = React.memo(
                   // we need update state before executing the action in case
                   // the action uses the appState it's being passed (that still
                   // contains a defined contextMenu) to return the next state.
-                  onClose(() => {
+                  setAppState({ contextMenu: null }, () => {
                     actionManager.executeAction(item, "contextMenu");
                   });
                 }}

@@ -12,7 +12,6 @@ const DropdownMenuItemLink = ({
   children,
   onSelect,
   className = "",
-  selected,
   ...rest
 }: {
   href: string;
@@ -20,7 +19,6 @@ const DropdownMenuItemLink = ({
   children: React.ReactNode;
   shortcut?: string;
   className?: string;
-  selected?: boolean;
   onSelect?: (event: Event) => void;
 } & React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
   const handleClick = useHandleDropdownMenuItemClick(rest.onClick, onSelect);
@@ -31,7 +29,7 @@ const DropdownMenuItemLink = ({
       href={href}
       target="_blank"
       rel="noreferrer"
-      className={getDropdownMenuItemClassName(className, selected)}
+      className={getDropdownMenuItemClassName(className)}
       title={rest.title ?? rest["aria-label"]}
       onClick={handleClick}
     >

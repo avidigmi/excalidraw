@@ -73,7 +73,7 @@ const Footer = ({
       <FooterCenterTunnel.Out />
       <div
         className={clsx("layer-ui__wrapper__footer-right zen-mode-transition", {
-          "transition-right": appState.zenModeEnabled,
+          "transition-right disable-pointerEvents": appState.zenModeEnabled,
         })}
       >
         <div style={{ position: "relative" }}>

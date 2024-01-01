@@ -1,8 +1,13 @@
 import { vi } from "vitest";
 import ReactDOM from "react-dom";
-import { render, waitFor, GlobalTestState } from "./test-utils";
+import {
+  render,
+  waitFor,
+  GlobalTestState,
+  createPasteEvent,
+} from "./test-utils";
 import { Pointer, Keyboard } from "./helpers/ui";
-import { Excalidraw } from "../packages/excalidraw/index";
+import ExcalidrawApp from "../excalidraw-app";
 import { KEYS } from "../keys";
 import {
   getDefaultLineHeight,
@@ -11,7 +16,7 @@ import {
 import { getElementBounds } from "../element";
 import { NormalizedZoomValue } from "../types";
 import { API } from "./helpers/api";
-import { createPasteEvent, serializeAsClipboardJSON } from "../clipboard";
+import { copyToClipboard } from "../clipboard";
 
 const { h } = window;
 
@@ -30,16 +35,22 @@ vi.mock("../keys.ts", async (importOriginal) => {
   };
 });
 
-const sendPasteEvent = (text: string) => {
-  const clipboardEvent = createPasteEvent({
-    types: {
-      "text/plain": text,
+const setClipboardText = (text: string) => {
+  Object.assign(navigator, {
+    clipboard: {
+      readText: () => text,
     },
   });
+};
+
+const sendPasteEvent = (text?: string) => {
+  const clipboardEvent = createPasteEvent(
+    text || (() => window.navigator.clipboard.readText()),
+  );
   document.dispatchEvent(clipboardEvent);
 };
 
-const pasteWithCtrlCmdShiftV = (text: string) => {
+const pasteWithCtrlCmdShiftV = (text?: string) => {
   Keyboard.withModifierKeys({ ctrl: true, shift: true }, () => {
     //triggering keydown with an empty clipboard
     Keyboard.keyPress(KEYS.V);
@@ -48,7 +59,7 @@ const pasteWithCtrlCmdShiftV = (text: string) => {
   });
 };
 
-const pasteWithCtrlCmdV = (text: string) => {
+const pasteWithCtrlCmdV = (text?: string) => {
   Keyboard.withModifierKeys({ ctrl: true }, () => {
     //triggering keydown with an empty clipboard
     Keyboard.keyPress(KEYS.V);
@@ -68,13 +79,9 @@ beforeEach(async () => {
 
   mouse.reset();
 
-  await render(
-    <Excalidraw
-      autoFocus={true}
-      handleKeyboardGlobally={true}
-      initialData={{ appState: { zoom: { value: 1 as NormalizedZoomValue } } }}
-    />,
-  );
+  await render(<ExcalidrawApp />);
+  h.app.setAppState({ zoom: { value: 1 as NormalizedZoomValue } });
+  setClipboardText("");
   Object.assign(document, {
     elementFromPoint: () => GlobalTestState.canvas,
   });
@@ -83,10 +90,8 @@ beforeEach(async () => {
 describe("general paste behavior", () => {
   it("should randomize seed on paste", async () => {
     const rectangle = API.createElement({ type: "rectangle" });
-    const clipboardJSON = await serializeAsClipboardJSON({
-      elements: [rectangle],
-      files: null,
-    });
+    const clipboardJSON = (await copyToClipboard([rectangle], null))!;
+
     pasteWithCtrlCmdV(clipboardJSON);
 
     await waitFor(() => {
@@ -97,10 +102,7 @@ describe("general paste behavior", () => {
 
   it("should retain seed on shift-paste", async () => {
     const rectangle = API.createElement({ type: "rectangle" });
-    const clipboardJSON = await serializeAsClipboardJSON({
-      elements: [rectangle],
-      files: null,
-    });
+    const clipboardJSON = (await copyToClipboard([rectangle], null))!;
 
     // assert we don't randomize seed on shift-paste
     pasteWithCtrlCmdShiftV(clipboardJSON);
@@ -114,7 +116,8 @@ describe("general paste behavior", () => {
 describe("paste text as single lines", () => {
   it("should create an element for each line when copying with Ctrl/Cmd+V", async () => {
     const text = "sajgfakfn\naaksfnknas\nakefnkasf";
-    pasteWithCtrlCmdV(text);
+    setClipboardText(text);
+    pasteWithCtrlCmdV();
     await waitFor(() => {
       expect(h.elements.length).toEqual(text.split("\n").length);
     });
@@ -122,7 +125,8 @@ describe("paste text as single lines", () => {
 
   it("should ignore empty lines when creating an element for each line", async () => {
     const text = "\n\nsajgfakfn\n\n\naaksfnknas\n\nakefnkasf\n\n\n";
-    pasteWithCtrlCmdV(text);
+    setClipboardText(text);
+    pasteWithCtrlCmdV();
     await waitFor(() => {
       expect(h.elements.length).toEqual(3);
     });
@@ -130,7 +134,8 @@ describe("paste text as single lines", () => {
 
   it("should not create any element if clipboard has only new lines", async () => {
     const text = "\n\n\n\n\n";
-    pasteWithCtrlCmdV(text);
+    setClipboardText(text);
+    pasteWithCtrlCmdV();
     await waitFor(async () => {
       await sleep(50); // elements lenght will always be zero if we don't wait, since paste is async
       expect(h.elements.length).toEqual(0);
@@ -146,7 +151,8 @@ describe("paste text as single lines", () => {
       ) +
       10 / h.app.state.zoom.value;
     mouse.moveTo(100, 100);
-    pasteWithCtrlCmdV(text);
+    setClipboardText(text);
+    pasteWithCtrlCmdV();
     await waitFor(async () => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const [fx, firstElY] = getElementBounds(h.elements[0]);
@@ -167,7 +173,8 @@ describe("paste text as single lines", () => {
       ) +
       10 / h.app.state.zoom.value;
     mouse.moveTo(100, 100);
-    pasteWithCtrlCmdV(text);
+    setClipboardText(text);
+    pasteWithCtrlCmdV();
     await waitFor(async () => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const [fx, firstElY] = getElementBounds(h.elements[0]);
@@ -181,14 +188,16 @@ describe("paste text as single lines", () => {
 describe("paste text as a single element", () => {
   it("should create single text element when copying text with Ctrl/Cmd+Shift+V", async () => {
     const text = "sajgfakfn\naaksfnknas\nakefnkasf";
-    pasteWithCtrlCmdShiftV(text);
+    setClipboardText(text);
+    pasteWithCtrlCmdShiftV();
     await waitFor(() => {
       expect(h.elements.length).toEqual(1);
     });
   });
   it("should not create any element when only new lines in clipboard", async () => {
     const text = "\n\n\n\n";
-    pasteWithCtrlCmdShiftV(text);
+    setClipboardText(text);
+    pasteWithCtrlCmdShiftV();
     await waitFor(async () => {
       await sleep(50);
       expect(h.elements.length).toEqual(0);
@@ -230,7 +239,8 @@ describe("Paste bound text container", () => {
       type: "excalidraw/clipboard",
       elements: [container, textElement],
     });
-    pasteWithCtrlCmdShiftV(data);
+    setClipboardText(data);
+    pasteWithCtrlCmdShiftV();
 
     await waitFor(async () => {
       await sleep(1);
@@ -252,7 +262,8 @@ describe("Paste bound text container", () => {
         textElement,
       ],
     });
-    pasteWithCtrlCmdShiftV(data);
+    setClipboardText(data);
+    pasteWithCtrlCmdShiftV();
 
     await waitFor(async () => {
       await sleep(1);

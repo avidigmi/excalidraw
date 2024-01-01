@@ -18,7 +18,7 @@ const MenuTrigger = ({
     `dropdown-menu-button ${className}`,
     "zen-mode-transition",
     {
-      "dropdown-menu-button--mobile": device.editor.isMobile,
+      "dropdown-menu-button--mobile": device.isMobile,
     },
   ).trim();
   return (

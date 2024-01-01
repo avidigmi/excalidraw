@@ -21,10 +21,8 @@ import {
   canApplyRoundnessTypeToElement,
   getDefaultRoundnessTypeForElement,
   isFrameElement,
-  isArrowElement,
 } from "../element/typeChecks";
 import { getSelectedElements } from "../scene";
-import { ExcalidrawTextElement } from "../element/types";
 
 // `copiedStyles` is exported only for tests.
 export let copiedStyles: string = "{}";
@@ -101,19 +99,16 @@ export const actionPasteStyles = register({
 
           if (isTextElement(newElement)) {
             const fontSize =
-              (elementStylesToCopyFrom as ExcalidrawTextElement).fontSize ||
-              DEFAULT_FONT_SIZE;
+              elementStylesToCopyFrom?.fontSize || DEFAULT_FONT_SIZE;
             const fontFamily =
-              (elementStylesToCopyFrom as ExcalidrawTextElement).fontFamily ||
-              DEFAULT_FONT_FAMILY;
+              elementStylesToCopyFrom?.fontFamily || DEFAULT_FONT_FAMILY;
             newElement = newElementWith(newElement, {
               fontSize,
               fontFamily,
               textAlign:
-                (elementStylesToCopyFrom as ExcalidrawTextElement).textAlign ||
-                DEFAULT_TEXT_ALIGN,
+                elementStylesToCopyFrom?.textAlign || DEFAULT_TEXT_ALIGN,
               lineHeight:
-                (elementStylesToCopyFrom as ExcalidrawTextElement).lineHeight ||
+                elementStylesToCopyFrom.lineHeight ||
                 getDefaultLineHeight(fontFamily),
             });
             let container = null;
@@ -128,10 +123,7 @@ export const actionPasteStyles = register({
             redrawTextBoundingBox(newElement, container);
           }
 
-          if (
-            newElement.type === "arrow" &&
-            isArrowElement(elementStylesToCopyFrom)
-          ) {
+          if (newElement.type === "arrow") {
             newElement = newElementWith(newElement, {
               startArrowhead: elementStylesToCopyFrom.startArrowhead,
               endArrowhead: elementStylesToCopyFrom.endArrowhead,

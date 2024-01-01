@@ -1,11 +1,6 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 
-// Set the env variable to false so the excalidraw npm package doesn't throw
-// process undefined as docusaurus doesn't expose env variables by default
-
-process.env.IS_PREACT = "false";
-
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: "Excalidraw developer docs",
@@ -15,7 +10,7 @@ const config = {
   baseUrl: "/",
   onBrokenLinks: "throw",
   onBrokenMarkdownLinks: "warn",
-  favicon: "img/favicon.png",
+  favicon: "img/favicon.ico",
   organizationName: "Excalidraw", // Usually your GitHub org/user name.
   projectName: "excalidraw", // Usually your repo name.
 
@@ -128,7 +123,7 @@ const config = {
       prism: {
         theme: require("prism-react-renderer/themes/dracula"),
       },
-      image: "img/og-image-2.png",
+      image: "img/og-image.png",
       docs: {
         sidebar: {
           hideable: true,
@@ -144,15 +139,7 @@ const config = {
       },
     }),
   themes: ["@docusaurus/theme-live-codeblock"],
-  plugins: [
-    "docusaurus-plugin-sass",
-    [
-      "docusaurus2-dotenv",
-      {
-        systemvars: true,
-      },
-    ],
-  ],
+  plugins: ["docusaurus-plugin-sass"],
 };
 
 module.exports = config;

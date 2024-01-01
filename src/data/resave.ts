@@ -1,6 +1,7 @@
 import { ExcalidrawElement } from "../element/types";
 import { AppState, BinaryFiles } from "../types";
-import { exportCanvas, prepareElementsForExport } from ".";
+import { exportCanvas } from ".";
+import { getNonDeletedElements } from "../element";
 import { getFileHandleType, isImageFileHandleType } from "./blob";
 
 export const resaveAsImageWithScene = async (
@@ -22,19 +23,18 @@ export const resaveAsImageWithScene = async (
     exportEmbedScene: true,
   };
 
-  const { exportedElements, exportingFrame } = prepareElementsForExport(
-    elements,
+  await exportCanvas(
+    fileHandleType,
+    getNonDeletedElements(elements),
     appState,
-    false,
+    files,
+    {
+      exportBackground,
+      viewBackgroundColor,
+      name,
+      fileHandle,
+    },
   );
-
-  await exportCanvas(fileHandleType, exportedElements, appState, files, {
-    exportBackground,
-    viewBackgroundColor,
-    name,
-    fileHandle,
-    exportingFrame,
-  });
 
   return { fileHandle };
 };

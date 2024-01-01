@@ -7,7 +7,7 @@
   }
 
   .FixedSideContainer > * {
-    pointer-events: var(--ui-pointerEvents);
+    pointer-events: all;
   }
 
   .FixedSideContainer_side_top {

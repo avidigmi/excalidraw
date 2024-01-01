@@ -3,9 +3,6 @@ import "vitest-canvas-mock";
 import "@testing-library/jest-dom";
 import { vi } from "vitest";
 import polyfill from "./polyfill";
-import { testPolyfills } from "./tests/helpers/polyfills";
-
-Object.assign(globalThis, testPolyfills);
 
 require("fake-indexeddb/auto");
 

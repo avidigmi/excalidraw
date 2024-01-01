@@ -3,9 +3,8 @@ import { getShortcutFromShortcutName } from "../../actions/shortcuts";
 import { t, useI18n } from "../../i18n";
 import { useDevice, useExcalidrawActionManager } from "../App";
 import { useTunnels } from "../../context/tunnels";
-import { HelpIcon, LoadIcon, usersIcon } from "../icons";
+import { ExcalLogo, HelpIcon, LoadIcon, usersIcon } from "../icons";
 import { useUIAppState } from "../../context/ui-appState";
-import { ExcalidrawLogo } from "../ExcalidrawLogo";
 
 const WelcomeScreenMenuItemContent = ({
   icon,
@@ -21,7 +20,7 @@ const WelcomeScreenMenuItemContent = ({
     <>
       <div className="welcome-screen-menu-item__icon">{icon}</div>
       <div className="welcome-screen-menu-item__text">{children}</div>
-      {shortcut && !device.editor.isMobile && (
+      {shortcut && !device.isMobile && (
         <div className="welcome-screen-menu-item__shortcut">{shortcut}</div>
       )}
     </>
@@ -110,7 +109,7 @@ Center.displayName = "Center";
 const Logo = ({ children }: { children?: React.ReactNode }) => {
   return (
     <div className="welcome-screen-center__logo virgil welcome-screen-decor">
-      {children || <ExcalidrawLogo withText />}
+      {children || <>{ExcalLogo} Excalidraw</>}
     </div>
   );
 };
@@ -165,6 +164,21 @@ const MenuItemLoadScene = () => {
 };
 MenuItemLoadScene.displayName = "MenuItemLoadScene";
 
+const MenuItemLiveCollaborationTrigger = ({
+  onSelect,
+}: {
+  onSelect: () => any;
+}) => {
+  const { t } = useI18n();
+  return (
+    <WelcomeScreenMenuItem shortcut={null} onSelect={onSelect} icon={usersIcon}>
+      {t("labels.liveCollaboration")}
+    </WelcomeScreenMenuItem>
+  );
+};
+MenuItemLiveCollaborationTrigger.displayName =
+  "MenuItemLiveCollaborationTrigger";
+
 // -----------------------------------------------------------------------------
 
 Center.Logo = Logo;
@@ -174,5 +188,6 @@ Center.MenuItem = WelcomeScreenMenuItem;
 Center.MenuItemLink = WelcomeScreenMenuItemLink;
 Center.MenuItemHelp = MenuItemHelp;
 Center.MenuItemLoadScene = MenuItemLoadScene;
+Center.MenuItemLiveCollaborationTrigger = MenuItemLiveCollaborationTrigger;
 
 export { Center };

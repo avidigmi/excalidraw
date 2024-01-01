@@ -14,6 +14,7 @@ export {
   canHaveArrowheads,
   canChangeRoundness,
   getElementAtPosition,
+  hasText,
   getElementsAtPosition,
 } from "./comparisons";
 export { getNormalizedZoom } from "./zoom";

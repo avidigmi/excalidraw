@@ -23,7 +23,6 @@ import {
   LIBRARY_SIDEBAR_TAB,
 } from "../constants";
 import { libraryItemSvgsCache } from "../hooks/useLibraryItemSvg";
-import { cloneJSON } from "../utils";
 
 export const libraryItemsAtom = atom<{
   status: "loading" | "loaded";
@@ -32,7 +31,7 @@ export const libraryItemsAtom = atom<{
 }>({ status: "loaded", isInitialized: true, libraryItems: [] });
 
 const cloneLibraryItems = (libraryItems: LibraryItems): LibraryItems =>
-  cloneJSON(libraryItems);
+  JSON.parse(JSON.stringify(libraryItems));
 
 /**
  * checks if library item does not exist already in current library

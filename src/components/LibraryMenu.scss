@@ -99,10 +99,10 @@
     font-size: 0.75rem;
 
     &:hover {
-      background-color: var(--color-brand-hover);
+      background-color: var(--color-primary-darker);
     }
     &:active {
-      background-color: var(--color-brand-active);
+      background-color: var(--color-primary-darkest);
     }
   }
 

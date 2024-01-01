@@ -30,7 +30,7 @@ const MenuContent = ({
   });
 
   const classNames = clsx(`dropdown-menu ${className}`, {
-    "dropdown-menu--mobile": device.editor.isMobile,
+    "dropdown-menu--mobile": device.isMobile,
   }).trim();
 
   return (
@@ -43,7 +43,7 @@ const MenuContent = ({
       >
         {/* the zIndex ensures this menu has higher stacking order,
     see https://github.com/excalidraw/excalidraw/pull/1445 */}
-        {device.editor.isMobile ? (
+        {device.isMobile ? (
           <Stack.Col className="dropdown-menu-container">{children}</Stack.Col>
         ) : (
           <Island

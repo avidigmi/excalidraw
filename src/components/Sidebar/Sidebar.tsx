@@ -113,11 +113,11 @@ export const SidebarInner = forwardRef(
           if ((event.target as Element).closest(".sidebar-trigger")) {
             return;
           }
-          if (!docked || !device.editor.canFitSidebar) {
+          if (!docked || !device.canDeviceFitSidebar) {
             closeLibrary();
           }
         },
-        [closeLibrary, docked, device.editor.canFitSidebar],
+        [closeLibrary, docked, device.canDeviceFitSidebar],
       ),
     );
 
@@ -125,7 +125,7 @@ export const SidebarInner = forwardRef(
       const handleKeyDown = (event: KeyboardEvent) => {
         if (
           event.key === KEYS.ESCAPE &&
-          (!docked || !device.editor.canFitSidebar)
+          (!docked || !device.canDeviceFitSidebar)
         ) {
           closeLibrary();
         }
@@ -134,7 +134,7 @@ export const SidebarInner = forwardRef(
       return () => {
         document.removeEventListener(EVENT.KEYDOWN, handleKeyDown);
       };
-    }, [closeLibrary, docked, device.editor.canFitSidebar]);
+    }, [closeLibrary, docked, device.canDeviceFitSidebar]);
 
     return (
       <Island

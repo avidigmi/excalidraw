@@ -15,7 +15,6 @@ export const actionToggleGridMode = register({
       appState: {
         ...appState,
         gridSize: this.checked!(appState) ? null : GRID_SIZE,
-        objectsSnapModeEnabled: false,
       },
       commitToHistory: false,
     };

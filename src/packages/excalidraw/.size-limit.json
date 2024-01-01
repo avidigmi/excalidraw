@@ -1,16 +1,16 @@
 [
   {
     "path": "dist/excalidraw.production.min.js",
-    "limit": "325 kB"
+    "limit": "291 kB"
   },
   {
     "path": "dist/excalidraw-assets/locales",
     "name": "dist/excalidraw-assets/locales",
-    "limit": "290 kB"
+    "limit": "270 kB"
   },
   {
     "path": "dist/excalidraw-assets/vendor-*.js",
     "name": "dist/excalidraw-assets/vendor*.js",
-    "limit": "900 kB"
+    "limit": "30 kB"
   }
 ]

@@ -22,7 +22,7 @@ const getHints = ({ appState, isMobile, device, app }: HintViewerProps) => {
   const { activeTool, isResizing, isRotating, lastPointerDownWith } = appState;
   const multiMode = appState.multiElement !== null;
 
-  if (appState.openSidebar && !device.editor.canFitSidebar) {
+  if (appState.openSidebar && !device.canDeviceFitSidebar) {
     return null;
   }
 
@@ -83,36 +83,27 @@ const getHints = ({ appState, isMobile, device, app }: HintViewerProps) => {
   if (activeTool.type === "selection") {
     if (
       appState.draggingElement?.type === "selection" &&
-      !selectedElements.length &&
       !appState.editingElement &&
       !appState.editingLinearElement
     ) {
       return t("hints.deepBoxSelect");
     }
-
-    if (appState.gridSize && appState.draggingElement) {
-      return t("hints.disableSnapping");
-    }
-
     if (!selectedElements.length && !isMobile) {
       return t("hints.canvasPanning");
     }
+  }
 
-    if (selectedElements.length === 1) {
-      if (isLinearElement(selectedElements[0])) {
-        if (appState.editingLinearElement) {
-          return appState.editingLinearElement.selectedPointsIndices
-            ? t("hints.lineEditor_pointSelected")
-            : t("hints.lineEditor_nothingSelected");
-        }
-        return t("hints.lineEditor_info");
+  if (selectedElements.length === 1) {
+    if (isLinearElement(selectedElements[0])) {
+      if (appState.editingLinearElement) {
+        return appState.editingLinearElement.selectedPointsIndices
+          ? t("hints.lineEditor_pointSelected")
+          : t("hints.lineEditor_nothingSelected");
       }
-      if (
-        !appState.draggingElement &&
-        isTextBindableContainer(selectedElements[0])
-      ) {
-        return t("hints.bindTextToElement");
-      }
+      return t("hints.lineEditor_info");
+    }
+    if (isTextBindableContainer(selectedElements[0])) {
+      return t("hints.bindTextToElement");
     }
   }
 

@@ -3,7 +3,8 @@
 .excalidraw {
   .sidebar-trigger {
     @include outlineButtonStyles;
-    @include filledButtonOnCanvas;
+
+    background-color: var(--island-bg-color);
 
     width: auto;
     height: var(--lg-button-size);
@@ -24,10 +25,10 @@
   }
 
   .default-sidebar-trigger .sidebar-trigger__label {
-    display: block;
-  }
-
-  &.excalidraw--mobile .default-sidebar-trigger .sidebar-trigger__label {
     display: none;
+
+    @media screen and (min-width: 1024px) {
+      display: block;
+    }
   }
 }

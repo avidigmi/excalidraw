@@ -11,14 +11,12 @@ const DropdownMenuItem = ({
   children,
   shortcut,
   className,
-  selected,
   ...rest
 }: {
   icon?: JSX.Element;
   onSelect: (event: Event) => void;
   children: React.ReactNode;
   shortcut?: string;
-  selected?: boolean;
   className?: string;
 } & Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "onSelect">) => {
   const handleClick = useHandleDropdownMenuItemClick(rest.onClick, onSelect);
@@ -28,7 +26,7 @@ const DropdownMenuItem = ({
       {...rest}
       onClick={handleClick}
       type="button"
-      className={getDropdownMenuItemClassName(className, selected)}
+      className={getDropdownMenuItemClassName(className)}
       title={rest.title ?? rest["aria-label"]}
     >
       <MenuItemContent icon={icon} shortcut={shortcut}>

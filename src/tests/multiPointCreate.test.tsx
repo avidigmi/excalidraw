@@ -5,7 +5,7 @@ import {
   mockBoundingClientRect,
   restoreOriginalGetBoundingClientRect,
 } from "./test-utils";
-import { Excalidraw } from "../packages/excalidraw/index";
+import ExcalidrawApp from "../excalidraw-app";
 import * as Renderer from "../renderer/renderScene";
 import { KEYS } from "../keys";
 import { ExcalidrawLinearElement } from "../element/types";
@@ -29,7 +29,7 @@ const { h } = window;
 
 describe("remove shape in non linear elements", () => {
   beforeAll(() => {
-    mockBoundingClientRect({ width: 1000, height: 1000 });
+    mockBoundingClientRect();
   });
 
   afterAll(() => {
@@ -37,23 +37,22 @@ describe("remove shape in non linear elements", () => {
   });
 
   it("rectangle", async () => {
-    const { getByToolName, container } = await render(<Excalidraw />);
+    const { getByToolName, container } = await render(<ExcalidrawApp />);
     // select tool
     const tool = getByToolName("rectangle");
     fireEvent.click(tool);
 
     const canvas = container.querySelector("canvas.interactive")!;
-
     fireEvent.pointerDown(canvas, { clientX: 30, clientY: 20 });
     fireEvent.pointerUp(canvas, { clientX: 30, clientY: 30 });
 
     expect(renderInteractiveScene).toHaveBeenCalledTimes(5);
-    expect(renderStaticScene).toHaveBeenCalledTimes(5);
+    expect(renderStaticScene).toHaveBeenCalledTimes(6);
     expect(h.elements.length).toEqual(0);
   });
 
   it("ellipse", async () => {
-    const { getByToolName, container } = await render(<Excalidraw />);
+    const { getByToolName, container } = await render(<ExcalidrawApp />);
     // select tool
     const tool = getByToolName("ellipse");
     fireEvent.click(tool);
@@ -63,12 +62,12 @@ describe("remove shape in non linear elements", () => {
     fireEvent.pointerUp(canvas, { clientX: 30, clientY: 30 });
 
     expect(renderInteractiveScene).toHaveBeenCalledTimes(5);
-    expect(renderStaticScene).toHaveBeenCalledTimes(5);
+    expect(renderStaticScene).toHaveBeenCalledTimes(6);
     expect(h.elements.length).toEqual(0);
   });
 
   it("diamond", async () => {
-    const { getByToolName, container } = await render(<Excalidraw />);
+    const { getByToolName, container } = await render(<ExcalidrawApp />);
     // select tool
     const tool = getByToolName("diamond");
     fireEvent.click(tool);
@@ -78,14 +77,14 @@ describe("remove shape in non linear elements", () => {
     fireEvent.pointerUp(canvas, { clientX: 30, clientY: 30 });
 
     expect(renderInteractiveScene).toHaveBeenCalledTimes(5);
-    expect(renderStaticScene).toHaveBeenCalledTimes(5);
+    expect(renderStaticScene).toHaveBeenCalledTimes(6);
     expect(h.elements.length).toEqual(0);
   });
 });
 
 describe("multi point mode in linear elements", () => {
   it("arrow", async () => {
-    const { getByToolName, container } = await render(<Excalidraw />);
+    const { getByToolName, container } = await render(<ExcalidrawApp />);
     // select tool
     const tool = getByToolName("arrow");
     fireEvent.click(tool);
@@ -110,8 +109,8 @@ describe("multi point mode in linear elements", () => {
       key: KEYS.ENTER,
     });
 
-    expect(renderInteractiveScene).toHaveBeenCalledTimes(11);
-    expect(renderStaticScene).toHaveBeenCalledTimes(9);
+    expect(renderInteractiveScene).toHaveBeenCalledTimes(10);
+    expect(renderStaticScene).toHaveBeenCalledTimes(11);
     expect(h.elements.length).toEqual(1);
 
     const element = h.elements[0] as ExcalidrawLinearElement;
@@ -129,7 +128,7 @@ describe("multi point mode in linear elements", () => {
   });
 
   it("line", async () => {
-    const { getByToolName, container } = await render(<Excalidraw />);
+    const { getByToolName, container } = await render(<ExcalidrawApp />);
     // select tool
     const tool = getByToolName("line");
     fireEvent.click(tool);
@@ -153,8 +152,9 @@ describe("multi point mode in linear elements", () => {
     fireEvent.keyDown(document, {
       key: KEYS.ENTER,
     });
-    expect(renderInteractiveScene).toHaveBeenCalledTimes(11);
-    expect(renderStaticScene).toHaveBeenCalledTimes(9);
+
+    expect(renderInteractiveScene).toHaveBeenCalledTimes(10);
+    expect(renderStaticScene).toHaveBeenCalledTimes(11);
     expect(h.elements.length).toEqual(1);
 
     const element = h.elements[0] as ExcalidrawLinearElement;

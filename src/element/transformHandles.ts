@@ -4,7 +4,7 @@ import {
   PointerType,
 } from "./types";
 
-import { Bounds, getElementAbsoluteCoords } from "./bounds";
+import { getElementAbsoluteCoords } from "./bounds";
 import { rotate } from "../math";
 import { InteractiveCanvasAppState, Zoom } from "../types";
 import { isTextElement } from ".";
@@ -23,7 +23,7 @@ export type TransformHandleDirection =
 
 export type TransformHandleType = TransformHandleDirection | "rotation";
 
-export type TransformHandle = Bounds;
+export type TransformHandle = [number, number, number, number];
 export type TransformHandles = Partial<{
   [T in TransformHandleType]: TransformHandle;
 }>;

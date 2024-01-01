@@ -8,6 +8,7 @@ import { Excalidraw } from "../packages/excalidraw/index";
 import { API } from "./helpers/api";
 import { Keyboard } from "./helpers/ui";
 import { KEYS } from "../keys";
+import ExcalidrawApp from "../excalidraw-app";
 
 const { h } = window;
 
@@ -55,7 +56,7 @@ describe("appState", () => {
 
   it("moving by page up/down/left/right", async () => {
     mockBoundingClientRect();
-    await render(<Excalidraw handleKeyboardGlobally={true} />, {});
+    await render(<ExcalidrawApp />, {});
 
     const scrollTest = () => {
       const initialScrollY = h.state.scrollY;

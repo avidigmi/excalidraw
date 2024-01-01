@@ -10,7 +10,7 @@ import { getNormalizedZoom } from "../scene";
 import { centerScrollOn } from "../scene/scroll";
 import { getStateForZoom } from "../scene/zoom";
 import { AppState, NormalizedZoomValue } from "../types";
-import { getShortcutKey, updateActiveTool } from "../utils";
+import { getShortcutKey, setCursor, updateActiveTool } from "../utils";
 import { register } from "./register";
 import { Tooltip } from "../components/Tooltip";
 import { newElementWith } from "../element/mutateElement";
@@ -21,7 +21,6 @@ import {
 } from "../appState";
 import { DEFAULT_CANVAS_BACKGROUND_PICKS } from "../colors";
 import { Bounds } from "../element/bounds";
-import { setCursor } from "../cursor";
 
 export const actionChangeViewBackgroundColor = register({
   name: "changeViewBackgroundColor",
@@ -265,21 +264,7 @@ export const zoomToFit = ({
       30.0,
     ) as NormalizedZoomValue;
 
-    let appStateWidth = appState.width;
-
-    if (appState.openSidebar) {
-      const sidebarDOMElem = document.querySelector(
-        ".sidebar",
-      ) as HTMLElement | null;
-      const sidebarWidth = sidebarDOMElem?.offsetWidth ?? 0;
-      const isRTL = document.documentElement.getAttribute("dir") === "rtl";
-
-      appStateWidth = !isRTL
-        ? appState.width - sidebarWidth
-        : appState.width + sidebarWidth;
-    }
-
-    scrollX = (appStateWidth / 2) * (1 / newZoomValue) - centerX;
+    scrollX = (appState.width / 2) * (1 / newZoomValue) - centerX;
     scrollY = (appState.height / 2) * (1 / newZoomValue) - centerY;
   } else {
     newZoomValue = zoomValueToFitBoundsOnViewport(commonBounds, {
@@ -452,6 +437,5 @@ export const actionToggleHandTool = register({
       commitToHistory: true,
     };
   },
-  keyTest: (event) =>
-    !event.altKey && !event[KEYS.CTRL_OR_CMD] && event.key === KEYS.H,
+  keyTest: (event) => event.key === KEYS.H,
 });

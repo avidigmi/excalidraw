@@ -8,7 +8,7 @@ const MobileFooter = ({
   excalidrawAPI: ExcalidrawImperativeAPI;
 }) => {
   const device = useDevice();
-  if (device.editor.isMobile) {
+  if (device.isMobile) {
     return (
       <Footer>
         <CustomFooter excalidrawAPI={excalidrawAPI} />

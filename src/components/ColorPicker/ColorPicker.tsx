@@ -80,7 +80,7 @@ const ColorPickerPopupContent = ({
   );
 
   const { container } = useExcalidrawContainer();
-  const device = useDevice();
+  const { isMobile, isLandscape } = useDevice();
 
   const colorInputJSX = (
     <div>
@@ -91,7 +91,6 @@ const ColorPickerPopupContent = ({
         onChange={(color) => {
           onChange(color);
         }}
-        colorPickerType={type}
       />
     </div>
   );
@@ -136,20 +135,12 @@ const ColorPickerPopupContent = ({
           updateData({ openPopup: null });
           setActiveColorPickerSection(null);
         }}
-        side={
-          device.editor.isMobile && !device.viewport.isLandscape
-            ? "bottom"
-            : "right"
-        }
-        align={
-          device.editor.isMobile && !device.viewport.isLandscape
-            ? "center"
-            : "start"
-        }
+        side={isMobile && !isLandscape ? "bottom" : "right"}
+        align={isMobile && !isLandscape ? "center" : "start"}
         alignOffset={-16}
         sideOffset={20}
         style={{
-          zIndex: "var(--zIndex-layerUI)",
+          zIndex: 9999,
           backgroundColor: "var(--popup-bg-color)",
           maxWidth: "208px",
           maxHeight: window.innerHeight,
@@ -174,7 +165,6 @@ const ColorPickerPopupContent = ({
                   state = state || {
                     keepOpenOnAlt: true,
                     onSelect: onChange,
-                    colorPickerType: type,
                   };
                   state.keepOpenOnAlt = true;
                   return state;
@@ -185,7 +175,6 @@ const ColorPickerPopupContent = ({
                   : {
                       keepOpenOnAlt: false,
                       onSelect: onChange,
-                      colorPickerType: type,
                     };
               });
             }}

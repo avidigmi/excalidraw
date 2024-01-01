@@ -13,7 +13,7 @@ export default defineConfig({
   server: {
     port: Number(envVars.VITE_APP_PORT || 3000),
     // open the browser
-    open: false,
+    open: true,
   },
   build: {
     outDir: "build",
@@ -104,14 +104,14 @@ export default defineConfig({
           "Excalidraw is a whiteboard tool that lets you easily sketch diagrams that have a hand-drawn feel to them.",
         icons: [
           {
-            src: "android-chrome-192x192.png",
-            sizes: "192x192",
+            src: "logo-180x180.png",
+            sizes: "180x180",
             type: "image/png",
           },
           {
             src: "apple-touch-icon.png",
             type: "image/png",
-            sizes: "180x180",
+            sizes: "256x256",
           },
         ],
         start_url: "/",

@@ -59,6 +59,12 @@
     &:focus {
       outline: none;
     }
+
+    @include isMobile {
+      max-width: 100%;
+      border: 0;
+      border-radius: 0;
+    }
   }
 
   @keyframes Modal__background__fade-in {
@@ -99,7 +105,7 @@
     }
   }
 
-  .Dialog--fullscreen {
+  @include isMobile {
     .Modal {
       padding: 0;
     }
@@ -110,9 +116,6 @@
       left: 0;
       right: 0;
       bottom: 0;
-      max-width: 100%;
-      border: 0;
-      border-radius: 0;
     }
   }
 }

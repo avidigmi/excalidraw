@@ -18,7 +18,7 @@ export const SidebarHeader = ({
   const props = useContext(SidebarPropsContext);
 
   const renderDockButton = !!(
-    device.editor.canFitSidebar && props.shouldRenderDockButton
+    device.canDeviceFitSidebar && props.shouldRenderDockButton
   );
 
   return (

@@ -14,7 +14,7 @@ const MenuItemContent = ({
     <>
       <div className="dropdown-menu-item__icon">{icon}</div>
       <div className="dropdown-menu-item__text">{children}</div>
-      {shortcut && !device.editor.isMobile && (
+      {shortcut && !device.isMobile && (
         <div className="dropdown-menu-item__shortcut">{shortcut}</div>
       )}
     </>

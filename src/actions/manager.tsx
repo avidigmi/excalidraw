@@ -29,7 +29,7 @@ const trackAction = (
           trackEvent(
             action.trackEvent.category,
             action.trackEvent.action || action.name,
-            `${source} (${app.device.editor.isMobile ? "mobile" : "desktop"})`,
+            `${source} (${app.device.isMobile ? "mobile" : "desktop"})`,
           );
         }
       }
@@ -119,10 +119,10 @@ export class ActionManager {
     return true;
   }
 
-  executeAction<T extends Action>(
-    action: T,
+  executeAction(
+    action: Action,
     source: ActionSource = "api",
-    value: Parameters<T["perform"]>[2] = null,
+    value: any = null,
   ) {
     const elements = this.getElementsIncludingDeleted();
     const appState = this.getAppState();

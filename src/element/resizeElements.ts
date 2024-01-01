@@ -41,7 +41,7 @@ import {
   MaybeTransformHandleType,
   TransformHandleDirection,
 } from "./transformHandles";
-import { AppState, Point, PointerDownState } from "../types";
+import { Point, PointerDownState } from "../types";
 import Scene from "../scene/Scene";
 import {
   getApproxMinLineWidth,
@@ -79,7 +79,6 @@ export const transformElements = (
   pointerY: number,
   centerX: number,
   centerY: number,
-  appState: AppState,
 ) => {
   if (selectedElements.length === 1) {
     const [element] = selectedElements;
@@ -467,8 +466,8 @@ export const resizeSingleElement = (
         boundTextElement.fontSize,
         boundTextElement.lineHeight,
       );
-      eleNewWidth = Math.max(eleNewWidth, minWidth);
-      eleNewHeight = Math.max(eleNewHeight, minHeight);
+      eleNewWidth = Math.ceil(Math.max(eleNewWidth, minWidth));
+      eleNewHeight = Math.ceil(Math.max(eleNewHeight, minHeight));
     }
   }
 
@@ -509,11 +508,8 @@ export const resizeSingleElement = (
     }
   }
 
-  const flipX = eleNewWidth < 0;
-  const flipY = eleNewHeight < 0;
-
   // Flip horizontally
-  if (flipX) {
+  if (eleNewWidth < 0) {
     if (transformHandleDirection.includes("e")) {
       newTopLeft[0] -= Math.abs(newBoundsWidth);
     }
@@ -521,9 +517,8 @@ export const resizeSingleElement = (
       newTopLeft[0] += Math.abs(newBoundsWidth);
     }
   }
-
   // Flip vertically
-  if (flipY) {
+  if (eleNewHeight < 0) {
     if (transformHandleDirection.includes("s")) {
       newTopLeft[1] -= Math.abs(newBoundsHeight);
     }
@@ -547,20 +542,10 @@ export const resizeSingleElement = (
   const rotatedNewCenter = rotatePoint(newCenter, startCenter, angle);
   newTopLeft = rotatePoint(rotatedTopLeft, rotatedNewCenter, -angle);
 
-  // For linear elements (x,y) are the coordinates of the first drawn point not the top-left corner
-  // So we need to readjust (x,y) to be where the first point should be
-  const newOrigin = [...newTopLeft];
-  const linearElementXOffset = stateAtResizeStart.x - newBoundsX1;
-  const linearElementYOffset = stateAtResizeStart.y - newBoundsY1;
-  newOrigin[0] += linearElementXOffset;
-  newOrigin[1] += linearElementYOffset;
-
-  const nextX = newOrigin[0];
-  const nextY = newOrigin[1];
-
   // Readjust points for linear elements
   let rescaledElementPointsY;
   let rescaledPoints;
+
   if (isLinearElement(element) || isFreeDrawElement(element)) {
     rescaledElementPointsY = rescalePoints(
       1,
@@ -577,11 +562,16 @@ export const resizeSingleElement = (
     );
   }
 
+  // For linear elements (x,y) are the coordinates of the first drawn point not the top-left corner
+  // So we need to readjust (x,y) to be where the first point should be
+  const newOrigin = [...newTopLeft];
+  newOrigin[0] += stateAtResizeStart.x - newBoundsX1;
+  newOrigin[1] += stateAtResizeStart.y - newBoundsY1;
   const resizedElement = {
     width: Math.abs(eleNewWidth),
     height: Math.abs(eleNewHeight),
-    x: nextX,
-    y: nextY,
+    x: newOrigin[0],
+    y: newOrigin[1],
     points: rescaledPoints,
   };
 
@@ -690,10 +680,6 @@ export const resizeMultipleElements = (
   const { minX, minY, maxX, maxY, midX, midY } = getCommonBoundingBox(
     targetElements.map(({ orig }) => orig).concat(boundTextElements),
   );
-
-  // const originalHeight = maxY - minY;
-  // const originalWidth = maxX - minX;
-
   const direction = transformHandleType;
 
   const mapDirectionsToAnchors: Record<typeof direction, Point> = {

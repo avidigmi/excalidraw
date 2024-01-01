@@ -55,7 +55,6 @@ export const TopPicks = ({
           type="button"
           title={color}
           onClick={() => onChange(color)}
-          data-testid={`color-top-pick-${color}`}
         >
           <div className="color-picker__button-outline" />
         </button>

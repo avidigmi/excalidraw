@@ -23,15 +23,12 @@ export type ExportCB = (
 const JSONExportModal = ({
   elements,
   appState,
-  setAppState,
   files,
   actionManager,
   exportOpts,
   canvas,
-  onCloseRequest,
 }: {
   appState: UIAppState;
-  setAppState: React.Component<any, UIAppState>["setState"];
   files: BinaryFiles;
   elements: readonly NonDeletedExcalidrawElement[];
   actionManager: ActionManager;
@@ -75,14 +72,9 @@ const JSONExportModal = ({
               title={t("exportDialog.link_button")}
               aria-label={t("exportDialog.link_button")}
               showAriaLabel={true}
-              onClick={async () => {
-                try {
-                  trackEvent("export", "link", `ui (${getFrame()})`);
-                  await onExportToBackend(elements, appState, files, canvas);
-                  onCloseRequest();
-                } catch (error: any) {
-                  setAppState({ errorMessage: error.message });
-                }
+              onClick={() => {
+                onExportToBackend(elements, appState, files, canvas);
+                trackEvent("export", "link", `ui (${getFrame()})`);
               }}
             />
           </Card>
@@ -122,7 +114,6 @@ export const JSONExportDialog = ({
           <JSONExportModal
             elements={elements}
             appState={appState}
-            setAppState={setAppState}
             files={files}
             actionManager={actionManager}
             onCloseRequest={handleClose}

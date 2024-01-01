@@ -109,12 +109,8 @@
     "createContainerFromText": "متن را در یک جایگاه بپیچید",
     "link": {
       "edit": "ویرایش لینک",
-      "editEmbed": "",
       "create": "ایجاد پیوند",
-      "createEmbed": "",
-      "label": "لینک",
-      "labelEmbed": "",
-      "empty": ""
+      "label": "لینک"
     },
     "lineEditor": {
       "edit": "ویرایش لینک",
@@ -130,7 +126,7 @@
     "sidebarLock": "باز نگه داشتن سایدبار",
     "selectAllElementsInFrame": "",
     "removeAllElementsFromFrame": "",
-    "eyeDropper": "انتخاب رنگ از کرباس"
+    "eyeDropper": ""
   },
   "library": {
     "noItems": "آیتمی به اینجا اضافه نشده...",
@@ -164,16 +160,13 @@
     "darkMode": "حالت تیره",
     "lightMode": "حالت روشن",
     "zenMode": "حالت ذن",
-    "objectsSnapMode": "",
     "exitZenMode": "خروج از حالت تمرکز",
     "cancel": "لغو",
     "clear": "پاک کردن",
     "remove": "پاک کردن",
-    "embed": "",
     "publishLibrary": "انتشار",
     "submit": "ارسال",
-    "confirm": "تایید",
-    "embeddableInteractionButton": ""
+    "confirm": "تایید"
   },
   "alerts": {
     "clearReset": "این کار کل صفحه را پاک میکند. آیا مطمئنید؟",
@@ -203,7 +196,6 @@
     "imageInsertError": "عکس ارسال نشد. بعداً دوباره تلاش کنید...",
     "fileTooBig": "فایل خیلی بزرگ است حداکثر اندازه مجاز {{maxSize}}.",
     "svgImageInsertError": "تصویر SVG وارد نشد. نشانه گذاری SVG نامعتبر به نظر می رسد.",
-    "failedToFetchImage": "",
     "invalidSVGString": "SVG نادرست.",
     "cannotResolveCollabServer": "به سرور collab متصل نشد. لطفا صفحه را مجددا بارگذاری کنید و دوباره تلاش کنید.",
     "importLibraryError": "داده‌ها بارگذاری نشدند",
@@ -214,10 +206,6 @@
       "line2": "این می تواند منجر به شکستن <bold>عناصر متن</bold> در نقاشی های شما شود.",
       "line3": "اکیداً توصیه می کنیم این تنظیم را غیرفعال کنید. برای نحوه انجام این کار می‌توانید <link>این مراحل</link> را دنبال کنید.",
       "line4": "اگر غیرفعال کردن این تنظیم نمایش عناصر متنی را برطرف نکرد، لطفاً یک <issueLink>مشکل</issueLink> را در GitHub ما باز کنید یا برای ما در <discordLink>Discord</discordLink> بنویسید."
-    },
-    "libraryElementTypeError": {
-      "embeddable": "",
-      "image": ""
     }
   },
   "toolBar": {
@@ -236,10 +224,8 @@
     "link": "افزودن/به‌روزرسانی پیوند برای شکل انتخابی",
     "eraser": "پاک کن",
     "frame": "",
-    "embeddable": "",
-    "laser": "",
     "hand": "دست (ابزار پانینگ)",
-    "extraTools": "ابزارهای بیشتر"
+    "extraTools": ""
   },
   "headings": {
     "canvasActions": "عملیات روی بوم",
@@ -251,7 +237,6 @@
     "linearElement": "برای چند نقطه کلیک و برای یک خط بکشید",
     "freeDraw": "کلیک کنید و بکشید و وقتی کار تمام شد رها کنید",
     "text": "نکته: با برنامه انتخاب شده شما میتوانید با دوبار کلیک کردن هرکجا میخواید متن اظاف کنید",
-    "embeddable": "",
     "text_selected": "دوبار کلیک کنید یا Enter را فشار دهید تا نقاط را ویرایش کنید",
     "text_editing": "Escape یا CtrlOrCmd+ENTER را فشار دهید تا ویرایش تمام شود",
     "linearElementMulti": "روی آخرین نقطه کلیک کنید یا کلید ESC را بزنید یا کلید Enter را بزنید برای اتمام کار",
@@ -267,8 +252,7 @@
     "bindTextToElement": "برای افزودن اینتر را بزنید",
     "deepBoxSelect": "CtrlOrCmd را برای انتخاب عمیق و جلوگیری از کشیدن نگه دارید",
     "eraserRevert": "Alt را نگه دارید تا عناصر علامت گذاری شده برای حذف برگردند",
-    "firefox_clipboard_write": "احتمالاً می‌توان این ویژگی را با تنظیم پرچم «dom.events.asyncClipboard.clipboardItem» روی «true» فعال کرد. برای تغییر پرچم های مرورگر در فایرفاکس، از صفحه \"about:config\" دیدن کنید.",
-    "disableSnapping": ""
+    "firefox_clipboard_write": "احتمالاً می‌توان این ویژگی را با تنظیم پرچم «dom.events.asyncClipboard.clipboardItem» روی «true» فعال کرد. برای تغییر پرچم های مرورگر در فایرفاکس، از صفحه \"about:config\" دیدن کنید."
   },
   "canvasError": {
     "cannotShowPreview": "پیش نمایش نشان داده نمی شود",
@@ -378,7 +362,7 @@
   "imageExportDialog": {
     "header": "",
     "label": {
-      "withBackground": "پس زمینه",
+      "withBackground": "",
       "onlySelected": "",
       "darkMode": "",
       "embedScene": "",
@@ -427,26 +411,24 @@
     "fileSavedToFilename": "ذخیره در {filename}",
     "canvas": "بوم",
     "selection": "انتخاب",
-    "pasteAsSingleElement": "از {{shortcut}} برای چسباندن به عنوان یک عنصر استفاده کنید،\nیا در یک ویرایشگر متن موجود جایگذاری کنید",
-    "unableToEmbed": "",
-    "unrecognizedLinkFormat": ""
+    "pasteAsSingleElement": "از {{shortcut}} برای چسباندن به عنوان یک عنصر استفاده کنید،\nیا در یک ویرایشگر متن موجود جایگذاری کنید"
   },
   "colors": {
     "transparent": "شفاف",
-    "black": "سیاه",
-    "white": "سفید",
-    "red": "قرمز",
-    "pink": "صورتی",
-    "grape": "یاقوتی",
-    "violet": "بنفش",
-    "gray": "خاکستری",
-    "blue": "آبی",
-    "cyan": "فیروزه‌ای",
-    "teal": "سبزآبی",
-    "green": "سبز",
-    "yellow": "زرد",
-    "orange": "نارنجی",
-    "bronze": "برنزی"
+    "black": "",
+    "white": "",
+    "red": "",
+    "pink": "",
+    "grape": "",
+    "violet": "",
+    "gray": "",
+    "blue": "",
+    "cyan": "",
+    "teal": "",
+    "green": "",
+    "yellow": "",
+    "orange": "",
+    "bronze": ""
   },
   "welcomeScreen": {
     "app": {
@@ -463,40 +445,9 @@
   },
   "colorPicker": {
     "mostUsedCustomColors": "",
-    "colors": "رنگ‌ها",
-    "shades": "جلوه‌ها",
-    "hexCode": "کدِ هگز",
+    "colors": "",
+    "shades": "",
+    "hexCode": "",
     "noShades": ""
-  },
-  "overwriteConfirm": {
-    "action": {
-      "exportToImage": {
-        "title": "",
-        "button": "",
-        "description": ""
-      },
-      "saveToDisk": {
-        "title": "ذخیره در دیسک",
-        "button": "ذخیره در دیسک",
-        "description": ""
-      },
-      "excalidrawPlus": {
-        "title": "",
-        "button": "",
-        "description": ""
-      }
-    },
-    "modal": {
-      "loadFromFile": {
-        "title": "بارگذاری از فایل",
-        "button": "بارگذاری از فایل",
-        "description": ""
-      },
-      "shareableLink": {
-        "title": "",
-        "button": "",
-        "description": ""
-      }
-    }
   }
 }

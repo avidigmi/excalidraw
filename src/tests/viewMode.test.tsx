@@ -1,5 +1,5 @@
 import { render, GlobalTestState } from "./test-utils";
-import { Excalidraw } from "../packages/excalidraw/index";
+import ExcalidrawApp from "../excalidraw-app";
 import { KEYS } from "../keys";
 import { Keyboard, Pointer, UI } from "./helpers/ui";
 import { CURSOR_TYPE } from "../constants";
@@ -12,7 +12,7 @@ const pointerTypes = [mouse, touch, pen];
 
 describe("view mode", () => {
   beforeEach(async () => {
-    await render(<Excalidraw />);
+    await render(<ExcalidrawApp />);
   });
 
   it("after switching to view mode – cursor type should be pointer", async () => {

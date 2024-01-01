@@ -15,6 +15,7 @@ import {
   save,
   SunIcon,
   TrashIcon,
+  usersIcon,
 } from "../icons";
 import { GithubIcon, DiscordIcon, TwitterIcon } from "../icons";
 import DropdownMenuItem from "../dropdownMenu/DropdownMenuItem";
@@ -28,6 +29,7 @@ import {
 } from "../../actions";
 
 import "./DefaultItems.scss";
+import clsx from "clsx";
 import { useSetAtom } from "jotai";
 import { activeConfirmDialogAtom } from "../ActiveConfirmDialog";
 import { jotaiScope } from "../../jotai";
@@ -265,3 +267,27 @@ export const Socials = () => (
   </>
 );
 Socials.displayName = "Socials";
+
+export const LiveCollaborationTrigger = ({
+  onSelect,
+  isCollaborating,
+}: {
+  onSelect: () => void;
+  isCollaborating: boolean;
+}) => {
+  const { t } = useI18n();
+  return (
+    <DropdownMenuItem
+      data-testid="collab-button"
+      icon={usersIcon}
+      className={clsx({
+        "active-collab": isCollaborating,
+      })}
+      onSelect={onSelect}
+    >
+      {t("labels.liveCollaboration")}
+    </DropdownMenuItem>
+  );
+};
+
+LiveCollaborationTrigger.displayName = "LiveCollaborationTrigger";

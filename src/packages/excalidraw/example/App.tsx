@@ -74,6 +74,7 @@ const {
   Footer,
   WelcomeScreen,
   MainMenu,
+  LiveCollaborationTrigger,
   convertToExcalidrawElements,
 } = window.ExcalidrawLib;
 
@@ -97,7 +98,6 @@ export default function App({ appTitle, useCustom, customArgs }: AppProps) {
   const [exportWithDarkMode, setExportWithDarkMode] = useState(false);
   const [exportEmbedScene, setExportEmbedScene] = useState(false);
   const [theme, setTheme] = useState<Theme>("light");
-  const [disableImageTool, setDisableImageTool] = useState(false);
   const [isCollaborating, setIsCollaborating] = useState(false);
   const [commentIcons, setCommentIcons] = useState<{ [id: string]: Comment }>(
     {},
@@ -153,12 +153,22 @@ export default function App({ appTitle, useCustom, customArgs }: AppProps) {
 
   const renderTopRightUI = (isMobile: boolean) => {
     return (
+      <>
+        {!isMobile && (
+          <LiveCollaborationTrigger
+            isCollaborating={isCollaborating}
+            onSelect={() => {
+              window.alert("Collab dialog clicked");
+            }}
+          />
+        )}
         <button
           onClick={() => alert("This is an empty top right UI")}
           style={{ height: "2.5rem" }}
         >
           Click me
         </button>
+      </>
     );
   };
 
@@ -497,6 +507,10 @@ export default function App({ appTitle, useCustom, customArgs }: AppProps) {
         <MainMenu.DefaultItems.SaveAsImage />
         <MainMenu.DefaultItems.Export />
         <MainMenu.Separator />
+        <MainMenu.DefaultItems.LiveCollaborationTrigger
+          isCollaborating={isCollaborating}
+          onSelect={() => window.alert("You clicked on collab button")}
+        />
         <MainMenu.Group title="Excalidraw links">
           <MainMenu.DefaultItems.Socials />
         </MainMenu.Group>
@@ -595,16 +609,6 @@ export default function App({ appTitle, useCustom, customArgs }: AppProps) {
           <label>
             <input
               type="checkbox"
-              checked={disableImageTool === true}
-              onChange={() => {
-                setDisableImageTool(!disableImageTool);
-              }}
-            />
-            Disable Image Tool
-          </label>
-          <label>
-            <input
-              type="checkbox"
               checked={isCollaborating}
               onChange={() => {
                 if (!isCollaborating) {
@@ -661,9 +665,7 @@ export default function App({ appTitle, useCustom, customArgs }: AppProps) {
         </div>
         <div className="excalidraw-wrapper">
           <Excalidraw
-            excalidrawAPI={(api: ExcalidrawImperativeAPI) =>
-              setExcalidrawAPI(api)
-            }
+            ref={(api: ExcalidrawImperativeAPI) => setExcalidrawAPI(api)}
             initialData={initialStatePromiseRef.current.promise}
             onChange={(elements, state) => {
               console.info("Elements :", elements, "State : ", state);
@@ -682,7 +684,6 @@ export default function App({ appTitle, useCustom, customArgs }: AppProps) {
               canvasActions: {
                 loadScene: false,
               },
-              tools: { image: !disableImageTool },
             }}
             renderTopRightUI={renderTopRightUI}
             onLinkOpen={onLinkOpen}

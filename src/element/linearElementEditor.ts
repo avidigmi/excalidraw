@@ -21,7 +21,6 @@ import {
 } from "../math";
 import { getElementAbsoluteCoords, getLockedLinearCursorAlignSize } from ".";
 import {
-  Bounds,
   getCurvePathOps,
   getElementPointsCoords,
   getMinMaxXYFromCurvePathOps,
@@ -43,7 +42,7 @@ import {
 } from "./binding";
 import { tupleToCoors } from "../utils";
 import { isBindingElement } from "./typeChecks";
-import { KEYS, shouldRotateWithDiscreteAngle } from "../keys";
+import { shouldRotateWithDiscreteAngle } from "../keys";
 import { getBoundTextElement, handleBindTextResize } from "./textElement";
 import { DRAGGING_THRESHOLD } from "../constants";
 import { Mutable } from "../utility-types";
@@ -222,7 +221,7 @@ export class LinearElementEditor {
           element,
           referencePoint,
           [scenePointerX, scenePointerY],
-          event[KEYS.CTRL_OR_CMD] ? null : appState.gridSize,
+          appState.gridSize,
         );
 
         LinearElementEditor.movePoints(element, [
@@ -239,7 +238,7 @@ export class LinearElementEditor {
           element,
           scenePointerX - linearElementEditor.pointerOffset.x,
           scenePointerY - linearElementEditor.pointerOffset.y,
-          event[KEYS.CTRL_OR_CMD] ? null : appState.gridSize,
+          appState.gridSize,
         );
 
         const deltaX = newDraggingPointPosition[0] - draggingPoint[0];
@@ -255,7 +254,7 @@ export class LinearElementEditor {
                     element,
                     scenePointerX - linearElementEditor.pointerOffset.x,
                     scenePointerY - linearElementEditor.pointerOffset.y,
-                    event[KEYS.CTRL_OR_CMD] ? null : appState.gridSize,
+                    appState.gridSize,
                   )
                 : ([
                     element.points[pointIndex][0] + deltaX,
@@ -648,7 +647,7 @@ export class LinearElementEditor {
               element,
               scenePointer.x,
               scenePointer.y,
-              event[KEYS.CTRL_OR_CMD] ? null : appState.gridSize,
+              appState.gridSize,
             ),
           ],
         });
@@ -799,7 +798,7 @@ export class LinearElementEditor {
         element,
         lastCommittedPoint,
         [scenePointerX, scenePointerY],
-        event[KEYS.CTRL_OR_CMD] ? null : appState.gridSize,
+        appState.gridSize,
       );
 
       newPoint = [
@@ -811,7 +810,7 @@ export class LinearElementEditor {
         element,
         scenePointerX - appState.editingLinearElement.pointerOffset.x,
         scenePointerY - appState.editingLinearElement.pointerOffset.y,
-        event[KEYS.CTRL_OR_CMD] ? null : appState.gridSize,
+        appState.gridSize,
       );
     }
 
@@ -1177,7 +1176,6 @@ export class LinearElementEditor {
     linearElementEditor: LinearElementEditor,
     pointerCoords: PointerCoords,
     appState: AppState,
-    snapToGrid: boolean,
   ) {
     const element = LinearElementEditor.getElement(
       linearElementEditor.elementId,
@@ -1198,7 +1196,7 @@ export class LinearElementEditor {
       element,
       pointerCoords.x,
       pointerCoords.y,
-      snapToGrid ? appState.gridSize : null,
+      appState.gridSize,
     );
     const points = [
       ...element.points.slice(0, segmentMidpoint.index!),
@@ -1317,7 +1315,7 @@ export class LinearElementEditor {
 
   static getMinMaxXYWithBoundText = (
     element: ExcalidrawLinearElement,
-    elementBounds: Bounds,
+    elementBounds: [number, number, number, number],
     boundTextElement: ExcalidrawTextElementWithContainer,
   ): [number, number, number, number, number, number] => {
     let [x1, y1, x2, y2] = elementBounds;

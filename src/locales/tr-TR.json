@@ -50,7 +50,7 @@
     "veryLarge": "Çok geniş",
     "solid": "Dolu",
     "hachure": "Taralı",
-    "zigzag": "Zikzak",
+    "zigzag": "",
     "crossHatch": "Çapraz-taralı",
     "thin": "İnce",
     "bold": "Kalın",
@@ -106,15 +106,11 @@
     "increaseFontSize": "Yazı Tipi Boyutunu Büyült",
     "unbindText": "Metni çöz",
     "bindText": "Metni taşıyıcıya bağla",
-    "createContainerFromText": "Metni bileşen içinde sar",
+    "createContainerFromText": "",
     "link": {
       "edit": "Bağlantıyı düzenle",
-      "editEmbed": "Bağlantıyı düzenle & yerleştir",
       "create": "Bağlantı oluştur",
-      "createEmbed": "Bağlantı oluştur & yerleştir",
-      "label": "Bağlantı",
-      "labelEmbed": "Bağlantı & yerleştirme",
-      "empty": "Herhangi bir bağlantı oluşturulmadı"
+      "label": "Bağlantı"
     },
     "lineEditor": {
       "edit": "Çizgiyi düzenle",
@@ -128,9 +124,9 @@
     },
     "statusPublished": "Yayınlandı",
     "sidebarLock": "Kenar çubuğu açık kalsın",
-    "selectAllElementsInFrame": "Çerçevedeki tüm bileşenleri seç",
-    "removeAllElementsFromFrame": "Çerçevedeki tüm bileşenleri sil",
-    "eyeDropper": "Tuvalden renk seç"
+    "selectAllElementsInFrame": "",
+    "removeAllElementsFromFrame": "",
+    "eyeDropper": ""
   },
   "library": {
     "noItems": "Öğe eklenmedi...",
@@ -164,16 +160,13 @@
     "darkMode": "Koyu tema",
     "lightMode": "Açık tema",
     "zenMode": "Zen modu",
-    "objectsSnapMode": "Nesnelere hizala",
     "exitZenMode": "Zen modundan çık",
     "cancel": "İptal",
     "clear": "Temizle",
     "remove": "Kaldır",
-    "embed": "",
     "publishLibrary": "Yayınla",
     "submit": "Gönder",
-    "confirm": "Onayla",
-    "embeddableInteractionButton": "Etkileşime girmek için tıkla"
+    "confirm": "Onayla"
   },
   "alerts": {
     "clearReset": "Tuvalin tamamı temizlenecek. Emin misiniz?",
@@ -196,14 +189,13 @@
     "resetLibrary": "Bu işlem kütüphanenizi sıfırlayacak. Emin misiniz?",
     "removeItemsFromsLibrary": "{{count}} öğe(ler) kitaplıktan kaldırılsın mı?",
     "invalidEncryptionKey": "Şifreleme anahtarı 22 karakter olmalı. Canlı işbirliği devre dışı bırakıldı.",
-    "collabOfflineWarning": "İnternet bağlantısı bulunamadı. Değişiklikleriniz kaydedilmeyecek!"
+    "collabOfflineWarning": ""
   },
   "errors": {
     "unsupportedFileType": "Desteklenmeyen dosya türü.",
     "imageInsertError": "Görsel eklenemedi. Daha sonra tekrar deneyin...",
     "fileTooBig": "Dosya çok büyük. İzin verilen maksimum boyut {{maxSize}}.",
     "svgImageInsertError": "SVG resmi eklenemedi. SVG işaretlemesi geçersiz görünüyor.",
-    "failedToFetchImage": "",
     "invalidSVGString": "Geçersiz SVG.",
     "cannotResolveCollabServer": "İş birliği sunucusuna bağlanılamıyor. Lütfen sayfayı yenileyip tekrar deneyin.",
     "importLibraryError": "Kütüphane yüklenemedi",
@@ -214,10 +206,6 @@
       "line2": "",
       "line3": "",
       "line4": ""
-    },
-    "libraryElementTypeError": {
-      "embeddable": "",
-      "image": "Resimleri kütüphaneye ekleme desteği yakında geliyor!"
     }
   },
   "toolBar": {
@@ -235,11 +223,9 @@
     "penMode": "Kalem modu - dokunmayı engelle",
     "link": "Seçilen şekil için bağlantı Ekle/Güncelle",
     "eraser": "Silgi",
-    "frame": "Çerçeve aracı",
-    "embeddable": "Web Yerleştirme",
-    "laser": "Lazer işaretçisi",
+    "frame": "",
     "hand": "",
-    "extraTools": "Daha fazla araç"
+    "extraTools": ""
   },
   "headings": {
     "canvasActions": "Tuval eylemleri",
@@ -251,7 +237,6 @@
     "linearElement": "Birden fazla nokta için tıklayın, tek çizgi için sürükleyin",
     "freeDraw": "Tıkla ve sürükle, bitirdiğinde serbest bırak",
     "text": "İpucu: seçme aracıyla herhangi bir yere çift tıklayarak da yazı ekleyebilirsin",
-    "embeddable": "Web sitesi yerleştirmek için sürükle bırak",
     "text_selected": "Metni düzenlemek için çift tıklayın veya ENTER'a basın",
     "text_editing": "Düzenlemeyi bitirmek için ESC veya Ctrl/Cmd+ENTER tuşlarına basın",
     "linearElementMulti": "Bitirmek için son noktaya tıklayın ya da Escape veya Enter tuşuna basın",
@@ -267,8 +252,7 @@
     "bindTextToElement": "Enter tuşuna basarak metin ekleyin",
     "deepBoxSelect": "Ctrl/Cmd tuşuna basılı tutarak derin seçim yapın ya da sürüklemeyi engelleyin",
     "eraserRevert": "Alt tuşuna basılı tutarak silinme için işaretlenmiş ögeleri tersine çevirin",
-    "firefox_clipboard_write": "",
-    "disableSnapping": ""
+    "firefox_clipboard_write": ""
   },
   "canvasError": {
     "cannotShowPreview": "Önizleme gösterilemiyor",
@@ -376,27 +360,27 @@
     "removeItemsFromLib": "Seçilen ögeleri kütüphaneden kaldır"
   },
   "imageExportDialog": {
-    "header": "Resmi dışa aktar",
+    "header": "",
     "label": {
-      "withBackground": "Arka plan",
-      "onlySelected": "Sadece seçilen",
-      "darkMode": "Karanlık mod",
-      "embedScene": "Sahne yerleştir",
-      "scale": "Ölçeklendir",
-      "padding": "Dış boşluk"
+      "withBackground": "",
+      "onlySelected": "",
+      "darkMode": "",
+      "embedScene": "",
+      "scale": "",
+      "padding": ""
     },
     "tooltip": {
-      "embedScene": "Sahne verisi, sahnenin geri yüklenebilmesi için dışarı aktarılan PNG/SVG dosyasına kaydedilecektir. Bu, dışa aktarılan dosya boyutunu arttıracaktır."
+      "embedScene": ""
     },
     "title": {
-      "exportToPng": "PNG olarak dışa aktar",
-      "exportToSvg": "SVG olarak dışa aktar",
+      "exportToPng": "",
+      "exportToSvg": "",
       "copyPngToClipboard": ""
     },
     "button": {
-      "exportToPng": "PNG",
-      "exportToSvg": "SVG",
-      "copyPngToClipboard": "Panoya kopyala"
+      "exportToPng": "",
+      "exportToSvg": "",
+      "copyPngToClipboard": ""
     }
   },
   "encrypted": {
@@ -427,31 +411,29 @@
     "fileSavedToFilename": "{filename} kaydedildi",
     "canvas": "tuval",
     "selection": "seçim",
-    "pasteAsSingleElement": "Tekil obje olarak yapıştırmak için veya var olan bir metin editörüne yapıştırmak için {{shortcut}} kullanın",
-    "unableToEmbed": "",
-    "unrecognizedLinkFormat": ""
+    "pasteAsSingleElement": "Tekil obje olarak yapıştırmak için veya var olan bir metin editörüne yapıştırmak için {{shortcut}} kullanın"
   },
   "colors": {
     "transparent": "Şeffaf",
-    "black": "Siyah",
-    "white": "Beyaz",
-    "red": "Kırmızı",
-    "pink": "Pembe",
-    "grape": "Koyu Mor",
-    "violet": "Menekşe rengi",
-    "gray": "Gri",
-    "blue": "Mavi",
-    "cyan": "Camgöbeği",
-    "teal": "Deniz mavisi",
-    "green": "Yeşil",
-    "yellow": "Sarı",
-    "orange": "Turuncu",
+    "black": "",
+    "white": "",
+    "red": "",
+    "pink": "",
+    "grape": "",
+    "violet": "",
+    "gray": "",
+    "blue": "",
+    "cyan": "",
+    "teal": "",
+    "green": "",
+    "yellow": "",
+    "orange": "",
     "bronze": ""
   },
   "welcomeScreen": {
     "app": {
       "center_heading": "",
-      "center_heading_plus": "Ecalidraw+'a mı gitmek istediniz?",
+      "center_heading_plus": "",
       "menuHint": "Dışa aktar, seçenekler, diller, ..."
     },
     "defaults": {
@@ -462,41 +444,10 @@
     }
   },
   "colorPicker": {
-    "mostUsedCustomColors": "En çok kullanılan özel renkler",
-    "colors": "Renkler",
+    "mostUsedCustomColors": "",
+    "colors": "",
     "shades": "",
-    "hexCode": "Hex kodu",
+    "hexCode": "",
     "noShades": ""
-  },
-  "overwriteConfirm": {
-    "action": {
-      "exportToImage": {
-        "title": "",
-        "button": "",
-        "description": ""
-      },
-      "saveToDisk": {
-        "title": "",
-        "button": "Diske Kaydet",
-        "description": ""
-      },
-      "excalidrawPlus": {
-        "title": "",
-        "button": "",
-        "description": ""
-      }
-    },
-    "modal": {
-      "loadFromFile": {
-        "title": "",
-        "button": "",
-        "description": ""
-      },
-      "shareableLink": {
-        "title": "",
-        "button": "",
-        "description": ""
-      }
-    }
   }
 }

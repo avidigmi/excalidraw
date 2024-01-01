@@ -109,12 +109,8 @@
     "createContainerFromText": "",
     "link": {
       "edit": "Muokkaa linkkiä",
-      "editEmbed": "",
       "create": "Luo linkki",
-      "createEmbed": "",
-      "label": "Linkki",
-      "labelEmbed": "",
-      "empty": ""
+      "label": "Linkki"
     },
     "lineEditor": {
       "edit": "Muokkaa riviä",
@@ -164,16 +160,13 @@
     "darkMode": "Tumma tila",
     "lightMode": "Vaalea tila",
     "zenMode": "Zen-tila",
-    "objectsSnapMode": "",
     "exitZenMode": "Poistu zen-tilasta",
     "cancel": "Peruuta",
     "clear": "Pyyhi",
     "remove": "Poista",
-    "embed": "",
     "publishLibrary": "Julkaise",
     "submit": "Lähetä",
-    "confirm": "Vahvista",
-    "embeddableInteractionButton": ""
+    "confirm": "Vahvista"
   },
   "alerts": {
     "clearReset": "Tämä tyhjentää koko piirtoalueen. Jatketaanko?",
@@ -203,7 +196,6 @@
     "imageInsertError": "Kuvan lisääminen epäonnistui. Yritä myöhemmin uudelleen...",
     "fileTooBig": "Tiedosto on liian suuri. Suurin sallittu koko on {{maxSize}}.",
     "svgImageInsertError": "SVG- kuvaa ei voitu lisätä. Tiedoston SVG-sisältö näyttää virheelliseltä.",
-    "failedToFetchImage": "",
     "invalidSVGString": "Virheellinen SVG.",
     "cannotResolveCollabServer": "Yhteyden muodostaminen collab-palvelimeen epäonnistui. Virkistä sivu ja yritä uudelleen.",
     "importLibraryError": "Kokoelman lataaminen epäonnistui",
@@ -214,10 +206,6 @@
       "line2": "",
       "line3": "",
       "line4": ""
-    },
-    "libraryElementTypeError": {
-      "embeddable": "",
-      "image": ""
     }
   },
   "toolBar": {
@@ -236,8 +224,6 @@
     "link": "Lisää/päivitä linkki valitulle muodolle",
     "eraser": "Poistotyökalu",
     "frame": "",
-    "embeddable": "",
-    "laser": "",
     "hand": "Käsi (panning-työkalu)",
     "extraTools": ""
   },
@@ -251,7 +237,6 @@
     "linearElement": "Klikkaa piirtääksesi useampi piste, raahaa piirtääksesi yksittäinen viiva",
     "freeDraw": "Paina ja raahaa, päästä irti kun olet valmis",
     "text": "Vinkki: voit myös lisätä tekstiä kaksoisnapsauttamalla mihin tahansa valintatyökalulla",
-    "embeddable": "",
     "text_selected": "Kaksoisnapsauta tai paina ENTER muokataksesi tekstiä",
     "text_editing": "Paina Escape tai CtrlOrCmd+ENTER lopettaaksesi muokkaamisen",
     "linearElementMulti": "Lopeta klikkaamalla viimeistä pistettä, painamalla Escape- tai Enter-näppäintä",
@@ -267,8 +252,7 @@
     "bindTextToElement": "Lisää tekstiä painamalla enter",
     "deepBoxSelect": "Käytä syvävalintaa ja estä raahaus painamalla CtrlOrCmd",
     "eraserRevert": "Pidä Alt alaspainettuna, kumotaksesi merkittyjen elementtien poistamisen",
-    "firefox_clipboard_write": "Tämä ominaisuus voidaan todennäköisesti ottaa käyttöön asettamalla \"dom.events.asyncClipboard.clipboardItem\" kohta \"true\":ksi. Vaihtaaksesi selaimen kohdan Firefoxissa, käy \"about:config\" sivulla.",
-    "disableSnapping": ""
+    "firefox_clipboard_write": "Tämä ominaisuus voidaan todennäköisesti ottaa käyttöön asettamalla \"dom.events.asyncClipboard.clipboardItem\" kohta \"true\":ksi. Vaihtaaksesi selaimen kohdan Firefoxissa, käy \"about:config\" sivulla."
   },
   "canvasError": {
     "cannotShowPreview": "Esikatselua ei voitu näyttää",
@@ -427,9 +411,7 @@
     "fileSavedToFilename": "Tallennettiin kohteeseen {filename}",
     "canvas": "piirtoalue",
     "selection": "valinta",
-    "pasteAsSingleElement": "Käytä {{shortcut}} liittääksesi yhtenä elementtinä,\ntai liittääksesi olemassa olevaan tekstieditoriin",
-    "unableToEmbed": "",
-    "unrecognizedLinkFormat": ""
+    "pasteAsSingleElement": "Käytä {{shortcut}} liittääksesi yhtenä elementtinä,\ntai liittääksesi olemassa olevaan tekstieditoriin"
   },
   "colors": {
     "transparent": "Läpinäkyvä",
@@ -467,36 +449,5 @@
     "shades": "",
     "hexCode": "",
     "noShades": ""
-  },
-  "overwriteConfirm": {
-    "action": {
-      "exportToImage": {
-        "title": "",
-        "button": "",
-        "description": ""
-      },
-      "saveToDisk": {
-        "title": "",
-        "button": "",
-        "description": ""
-      },
-      "excalidrawPlus": {
-        "title": "",
-        "button": "",
-        "description": ""
-      }
-    },
-    "modal": {
-      "loadFromFile": {
-        "title": "",
-        "button": "",
-        "description": ""
-      },
-      "shareableLink": {
-        "title": "",
-        "button": "",
-        "description": ""
-      }
-    }
   }
 }

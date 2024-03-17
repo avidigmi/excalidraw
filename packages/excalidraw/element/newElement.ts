@@ -16,6 +16,7 @@ import {
   ExcalidrawEmbeddableElement,
   ExcalidrawMagicFrameElement,
   ExcalidrawIframeElement,
+  ElementsMap,
 } from "./types";
 import {
   arrayToMap,
@@ -31,7 +32,6 @@ import { getElementAbsoluteCoords } from ".";
 import { adjustXYWithRotation } from "../math";
 import { getResizedElementAbsoluteCoords } from "./bounds";
 import {
-  getContainerElement,
   measureText,
   normalizeText,
   wrapText,
@@ -69,6 +69,7 @@ export type ElementConstructorOpts = MarkOptional<
   | "roundness"
   | "locked"
   | "opacity"
+  | "customData"
 >;
 
 const _newElementBase = <T extends ExcalidrawElement>(
@@ -122,6 +123,7 @@ const _newElementBase = <T extends ExcalidrawElement>(
     updated: getUpdatedTimestamp(),
     link,
     locked,
+    customData: rest.customData,
   };
   return element;
 };
@@ -136,13 +138,9 @@ export const newElement = (
 export const newEmbeddableElement = (
   opts: {
     type: "embeddable";
-    validated: ExcalidrawEmbeddableElement["validated"];
   } & ElementConstructorOpts,
 ): NonDeleted<ExcalidrawEmbeddableElement> => {
-  return {
-    ..._newElementBase<ExcalidrawEmbeddableElement>("embeddable", opts),
-    validated: opts.validated,
-  };
+  return _newElementBase<ExcalidrawEmbeddableElement>("embeddable", opts);
 };
 
 export const newIframeElement = (
@@ -251,7 +249,6 @@ export const newTextElement = (
       y: opts.y - offsets.y,
       width: metrics.width,
       height: metrics.height,
-      baseline: metrics.baseline,
       containerId: opts.containerId || null,
       originalText: text,
       lineHeight,
@@ -263,19 +260,19 @@ export const newTextElement = (
 
 const getAdjustedDimensions = (
   element: ExcalidrawTextElement,
+  elementsMap: ElementsMap,
   nextText: string,
 ): {
   x: number;
   y: number;
   width: number;
   height: number;
-  baseline: number;
 } => {
-  const {
-    width: nextWidth,
-    height: nextHeight,
-    baseline: nextBaseline,
-  } = measureText(nextText, getFontString(element), element.lineHeight);
+  const { width: nextWidth, height: nextHeight } = measureText(
+    nextText,
+    getFontString(element),
+    element.lineHeight,
+  );
   const { textAlign, verticalAlign } = element;
   let x: number;
   let y: number;
@@ -297,7 +294,7 @@ const getAdjustedDimensions = (
     x = element.x - offsets.x;
     y = element.y - offsets.y;
   } else {
-    const [x1, y1, x2, y2] = getElementAbsoluteCoords(element);
+    const [x1, y1, x2, y2] = getElementAbsoluteCoords(element, elementsMap);
 
     const [nextX1, nextY1, nextX2, nextY2] = getResizedElementAbsoluteCoords(
       element,
@@ -329,7 +326,6 @@ const getAdjustedDimensions = (
   return {
     width: nextWidth,
     height: nextHeight,
-    baseline: nextBaseline,
     x: Number.isFinite(x) ? x : element.x,
     y: Number.isFinite(y) ? y : element.y,
   };
@@ -337,25 +333,28 @@ const getAdjustedDimensions = (
 
 export const refreshTextDimensions = (
   textElement: ExcalidrawTextElement,
+  container: ExcalidrawTextContainer | null,
+  elementsMap: ElementsMap,
   text = textElement.text,
 ) => {
   if (textElement.isDeleted) {
     return;
   }
-  const container = getContainerElement(textElement);
   if (container) {
     text = wrapText(
       text,
       getFontString(textElement),
-      getBoundTextMaxWidth(container),
+      getBoundTextMaxWidth(container, textElement),
     );
   }
-  const dimensions = getAdjustedDimensions(textElement, text);
+  const dimensions = getAdjustedDimensions(textElement, elementsMap, text);
   return { text, ...dimensions };
 };
 
 export const updateTextElement = (
   textElement: ExcalidrawTextElement,
+  container: ExcalidrawTextContainer | null,
+  elementsMap: ElementsMap,
   {
     text,
     isDeleted,
@@ -369,7 +368,7 @@ export const updateTextElement = (
   return newElementWith(textElement, {
     originalText,
     isDeleted: isDeleted ?? textElement.isDeleted,
-    ...refreshTextDimensions(textElement, originalText),
+    ...refreshTextDimensions(textElement, container, elementsMap, originalText),
   });
 };
 

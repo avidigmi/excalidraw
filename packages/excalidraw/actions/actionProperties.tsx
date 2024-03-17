@@ -1,4 +1,4 @@
-import { AppState, Primitive } from "../types";
+import { AppClassProperties, AppState, Primitive } from "../types";
 import {
   DEFAULT_ELEMENT_BACKGROUND_COLOR_PALETTE,
   DEFAULT_ELEMENT_BACKGROUND_PICKS,
@@ -66,7 +66,6 @@ import {
 import { mutateElement, newElementWith } from "../element/mutateElement";
 import {
   getBoundTextElement,
-  getContainerElement,
   getDefaultLineHeight,
 } from "../element/textElement";
 import {
@@ -189,6 +188,7 @@ const offsetElementAfterFontResize = (
 const changeFontSize = (
   elements: readonly ExcalidrawElement[],
   appState: AppState,
+  app: AppClassProperties,
   getNewFontSize: (element: ExcalidrawTextElement) => number,
   fallbackValue?: ExcalidrawTextElement["fontSize"],
 ) => {
@@ -206,7 +206,11 @@ const changeFontSize = (
           let newElement: ExcalidrawTextElement = newElementWith(oldElement, {
             fontSize: newFontSize,
           });
-          redrawTextBoundingBox(newElement, getContainerElement(oldElement));
+          redrawTextBoundingBox(
+            newElement,
+            app.scene.getContainerElement(oldElement),
+            app.scene.getNonDeletedElementsMap(),
+          );
 
           newElement = offsetElementAfterFontResize(oldElement, newElement);
 
@@ -600,10 +604,10 @@ export const actionChangeOpacity = register({
 export const actionChangeFontSize = register({
   name: "changeFontSize",
   trackEvent: false,
-  perform: (elements, appState, value) => {
-    return changeFontSize(elements, appState, () => value, value);
+  perform: (elements, appState, value, app) => {
+    return changeFontSize(elements, appState, app, () => value, value);
   },
-  PanelComponent: ({ elements, appState, updateData }) => (
+  PanelComponent: ({ elements, appState, updateData, app }) => (
     <fieldset>
       <legend>{t("labels.fontSize")}</legend>
       <ButtonIconSelect
@@ -641,14 +645,21 @@ export const actionChangeFontSize = register({
             if (isTextElement(element)) {
               return element.fontSize;
             }
-            const boundTextElement = getBoundTextElement(element);
+            const boundTextElement = getBoundTextElement(
+              element,
+              app.scene.getNonDeletedElementsMap(),
+            );
             if (boundTextElement) {
               return boundTextElement.fontSize;
             }
             return null;
           },
           (element) =>
-            isTextElement(element) || getBoundTextElement(element) !== null,
+            isTextElement(element) ||
+            getBoundTextElement(
+              element,
+              app.scene.getNonDeletedElementsMap(),
+            ) !== null,
           (hasSelection) =>
             hasSelection
               ? null
@@ -663,8 +674,8 @@ export const actionChangeFontSize = register({
 export const actionDecreaseFontSize = register({
   name: "decreaseFontSize",
   trackEvent: false,
-  perform: (elements, appState, value) => {
-    return changeFontSize(elements, appState, (element) =>
+  perform: (elements, appState, value, app) => {
+    return changeFontSize(elements, appState, app, (element) =>
       Math.round(
         // get previous value before relative increase (doesn't work fully
         // due to rounding and float precision issues)
@@ -685,8 +696,8 @@ export const actionDecreaseFontSize = register({
 export const actionIncreaseFontSize = register({
   name: "increaseFontSize",
   trackEvent: false,
-  perform: (elements, appState, value) => {
-    return changeFontSize(elements, appState, (element) =>
+  perform: (elements, appState, value, app) => {
+    return changeFontSize(elements, appState, app, (element) =>
       Math.round(element.fontSize * (1 + FONT_SIZE_RELATIVE_INCREASE_STEP)),
     );
   },
@@ -703,7 +714,7 @@ export const actionIncreaseFontSize = register({
 export const actionChangeFontFamily = register({
   name: "changeFontFamily",
   trackEvent: false,
-  perform: (elements, appState, value) => {
+  perform: (elements, appState, value, app) => {
     return {
       elements: changeProperty(
         elements,
@@ -717,7 +728,11 @@ export const actionChangeFontFamily = register({
                 lineHeight: getDefaultLineHeight(value),
               },
             );
-            redrawTextBoundingBox(newElement, getContainerElement(oldElement));
+            redrawTextBoundingBox(
+              newElement,
+              app.scene.getContainerElement(oldElement),
+              app.scene.getNonDeletedElementsMap(),
+            );
             return newElement;
           }
 
@@ -732,7 +747,7 @@ export const actionChangeFontFamily = register({
       commitToHistory: true,
     };
   },
-  PanelComponent: ({ elements, appState, updateData }) => {
+  PanelComponent: ({ elements, appState, updateData, app }) => {
     const options: {
       value: FontFamilyValues;
       text: string;
@@ -772,14 +787,21 @@ export const actionChangeFontFamily = register({
               if (isTextElement(element)) {
                 return element.fontFamily;
               }
-              const boundTextElement = getBoundTextElement(element);
+              const boundTextElement = getBoundTextElement(
+                element,
+                app.scene.getNonDeletedElementsMap(),
+              );
               if (boundTextElement) {
                 return boundTextElement.fontFamily;
               }
               return null;
             },
             (element) =>
-              isTextElement(element) || getBoundTextElement(element) !== null,
+              isTextElement(element) ||
+              getBoundTextElement(
+                element,
+                app.scene.getNonDeletedElementsMap(),
+              ) !== null,
             (hasSelection) =>
               hasSelection
                 ? null
@@ -795,7 +817,7 @@ export const actionChangeFontFamily = register({
 export const actionChangeTextAlign = register({
   name: "changeTextAlign",
   trackEvent: false,
-  perform: (elements, appState, value) => {
+  perform: (elements, appState, value, app) => {
     return {
       elements: changeProperty(
         elements,
@@ -806,7 +828,11 @@ export const actionChangeTextAlign = register({
               oldElement,
               { textAlign: value },
             );
-            redrawTextBoundingBox(newElement, getContainerElement(oldElement));
+            redrawTextBoundingBox(
+              newElement,
+              app.scene.getContainerElement(oldElement),
+              app.scene.getNonDeletedElementsMap(),
+            );
             return newElement;
           }
 
@@ -821,7 +847,8 @@ export const actionChangeTextAlign = register({
       commitToHistory: true,
     };
   },
-  PanelComponent: ({ elements, appState, updateData }) => {
+  PanelComponent: ({ elements, appState, updateData, app }) => {
+    const elementsMap = app.scene.getNonDeletedElementsMap();
     return (
       <fieldset>
         <legend>{t("labels.textAlign")}</legend>
@@ -854,14 +881,18 @@ export const actionChangeTextAlign = register({
               if (isTextElement(element)) {
                 return element.textAlign;
               }
-              const boundTextElement = getBoundTextElement(element);
+              const boundTextElement = getBoundTextElement(
+                element,
+                elementsMap,
+              );
               if (boundTextElement) {
                 return boundTextElement.textAlign;
               }
               return null;
             },
             (element) =>
-              isTextElement(element) || getBoundTextElement(element) !== null,
+              isTextElement(element) ||
+              getBoundTextElement(element, elementsMap) !== null,
             (hasSelection) =>
               hasSelection ? null : appState.currentItemTextAlign,
           )}
@@ -875,7 +906,7 @@ export const actionChangeTextAlign = register({
 export const actionChangeVerticalAlign = register({
   name: "changeVerticalAlign",
   trackEvent: { category: "element" },
-  perform: (elements, appState, value) => {
+  perform: (elements, appState, value, app) => {
     return {
       elements: changeProperty(
         elements,
@@ -887,7 +918,11 @@ export const actionChangeVerticalAlign = register({
               { verticalAlign: value },
             );
 
-            redrawTextBoundingBox(newElement, getContainerElement(oldElement));
+            redrawTextBoundingBox(
+              newElement,
+              app.scene.getContainerElement(oldElement),
+              app.scene.getNonDeletedElementsMap(),
+            );
             return newElement;
           }
 
@@ -901,7 +936,7 @@ export const actionChangeVerticalAlign = register({
       commitToHistory: true,
     };
   },
-  PanelComponent: ({ elements, appState, updateData }) => {
+  PanelComponent: ({ elements, appState, updateData, app }) => {
     return (
       <fieldset>
         <ButtonIconSelect<VerticalAlign | false>
@@ -933,14 +968,21 @@ export const actionChangeVerticalAlign = register({
               if (isTextElement(element) && element.containerId) {
                 return element.verticalAlign;
               }
-              const boundTextElement = getBoundTextElement(element);
+              const boundTextElement = getBoundTextElement(
+                element,
+                app.scene.getNonDeletedElementsMap(),
+              );
               if (boundTextElement) {
                 return boundTextElement.verticalAlign;
               }
               return null;
             },
             (element) =>
-              isTextElement(element) || getBoundTextElement(element) !== null,
+              isTextElement(element) ||
+              getBoundTextElement(
+                element,
+                app.scene.getNonDeletedElementsMap(),
+              ) !== null,
             (hasSelection) => (hasSelection ? null : VERTICAL_ALIGN.MIDDLE),
           )}
           onChange={(value) => updateData(value)}

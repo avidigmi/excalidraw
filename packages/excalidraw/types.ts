@@ -19,6 +19,7 @@ import {
   ExcalidrawMagicFrameElement,
   ExcalidrawFrameLikeElement,
   ExcalidrawElementType,
+  ExcalidrawIframeLikeElement,
 } from "./element/types";
 import { Action } from "./actions/types";
 import { Point as RoughPoint } from "roughjs/bin/geometry";
@@ -30,14 +31,14 @@ import type { throttleRAF } from "./utils";
 import { Spreadsheet } from "./charts";
 import { Language } from "./i18n";
 import { ClipboardData } from "./clipboard";
-import { isOverScrollBars } from "./scene";
+import { isOverScrollBars } from "./scene/scrollbars";
 import { MaybeTransformHandleType } from "./element/transformHandles";
 import Library from "./data/library";
 import type { FileSystemHandle } from "./data/filesystem";
 import type { IMAGE_MIME_TYPES, MIME_TYPES } from "./constants";
 import { ContextMenuItems } from "./components/ContextMenu";
 import { SnapLine } from "./snapping";
-import { Merge, ValueOf } from "./utility-types";
+import { Merge, MaybePromise, ValueOf } from "./utility-types";
 
 export type Point = Readonly<RoughPoint>;
 
@@ -246,7 +247,7 @@ export interface AppState {
   scrollY: number;
   cursorButton: "up" | "down";
   scrolledOutside: boolean;
-  name: string;
+  name: string | null;
   isResizing: boolean;
   isRotating: boolean;
   zoom: Zoom;
@@ -379,21 +380,14 @@ export type LibraryItems_anyVersion = LibraryItems | LibraryItems_v1;
 export type LibraryItemsSource =
   | ((
       currentLibraryItems: LibraryItems,
-    ) =>
-      | Blob
-      | LibraryItems_anyVersion
-      | Promise<LibraryItems_anyVersion | Blob>)
-  | Blob
-  | LibraryItems_anyVersion
-  | Promise<LibraryItems_anyVersion | Blob>;
+    ) => MaybePromise<LibraryItems_anyVersion | Blob>)
+  | MaybePromise<LibraryItems_anyVersion | Blob>;
 // -----------------------------------------------------------------------------
 
 export type ExcalidrawInitialDataState = Merge<
   ImportedDataState,
   {
-    libraryItems?:
-      | Required<ImportedDataState>["libraryItems"]
-      | Promise<Required<ImportedDataState>["libraryItems"]>;
+    libraryItems?: MaybePromise<Required<ImportedDataState>["libraryItems"]>;
   }
 >;
 
@@ -408,10 +402,7 @@ export interface ExcalidrawProps {
     appState: AppState,
     files: BinaryFiles,
   ) => void;
-  initialData?:
-    | ExcalidrawInitialDataState
-    | null
-    | Promise<ExcalidrawInitialDataState | null>;
+  initialData?: MaybePromise<ExcalidrawInitialDataState | null>;
   excalidrawAPI?: (api: ExcalidrawImperativeAPI) => void;
   isCollaborating?: boolean;
   onPointerUpdate?: (payload: {
@@ -434,6 +425,7 @@ export interface ExcalidrawProps {
   objectsSnapModeEnabled?: boolean;
   libraryReturnUrl?: string;
   theme?: Theme;
+  // @TODO come with better API before v0.18.0
   name?: string;
   renderCustomStats?: (
     elements: readonly NonDeletedExcalidrawElement[],
@@ -452,6 +444,10 @@ export interface ExcalidrawProps {
     }>,
   ) => void;
   onPointerDown?: (
+    activeTool: AppState["activeTool"],
+    pointerDownState: PointerDownState,
+  ) => void;
+  onPointerUp?: (
     activeTool: AppState["activeTool"],
     pointerDownState: PointerDownState,
   ) => void;
@@ -490,7 +486,6 @@ export type ExportOpts = {
     exportedElements: readonly NonDeletedExcalidrawElement[],
     appState: UIAppState,
     files: BinaryFiles,
-    canvas: HTMLCanvasElement,
   ) => void;
   renderCustomUI?: (
     exportedElements: readonly NonDeletedExcalidrawElement[],
@@ -573,6 +568,7 @@ export type AppClassProperties = {
   setOpenDialog: App["setOpenDialog"];
   insertEmbeddableElement: App["insertEmbeddableElement"];
   onMagicframeToolSelect: App["onMagicframeToolSelect"];
+  getName: App["getName"];
 };
 
 export type PointerDownState = Readonly<{
@@ -633,17 +629,11 @@ export type PointerDownState = Readonly<{
   boxSelection: {
     hasOccurred: boolean;
   };
-  elementIdsToErase: {
-    [key: ExcalidrawElement["id"]]: {
-      opacity: ExcalidrawElement["opacity"];
-      erase: boolean;
-    };
-  };
 }>;
 
 export type UnsubscribeCallback = () => void;
 
-export type ExcalidrawImperativeAPI = {
+export interface ExcalidrawImperativeAPI {
   updateScene: InstanceType<typeof App>["updateScene"];
   updateLibrary: InstanceType<typeof Library>["updateLibrary"];
   resetScene: InstanceType<typeof App>["resetScene"];
@@ -653,10 +643,11 @@ export type ExcalidrawImperativeAPI = {
   history: {
     clear: InstanceType<typeof App>["resetHistory"];
   };
-  scrollToContent: InstanceType<typeof App>["scrollToContent"];
   getSceneElements: InstanceType<typeof App>["getSceneElements"];
   getAppState: () => InstanceType<typeof App>["state"];
   getFiles: () => InstanceType<typeof App>["files"];
+  getName: InstanceType<typeof App>["getName"];
+  scrollToContent: InstanceType<typeof App>["scrollToContent"];
   registerAction: (action: Action) => void;
   refresh: InstanceType<typeof App>["refresh"];
   setToast: InstanceType<typeof App>["setToast"];
@@ -699,7 +690,7 @@ export type ExcalidrawImperativeAPI = {
   onUserFollow: (
     callback: (payload: OnUserFollowedPayload) => void,
   ) => UnsubscribeCallback;
-};
+}
 
 export type Device = Readonly<{
   viewport: {
@@ -751,3 +742,10 @@ export type Primitive =
   | undefined;
 
 export type JSONValue = string | number | boolean | null | object;
+
+export type EmbedsValidationStatus = Map<
+  ExcalidrawIframeLikeElement["id"],
+  boolean
+>;
+
+export type ElementsPendingErasure = Set<ExcalidrawElement["id"]>;

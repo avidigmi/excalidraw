@@ -35,13 +35,13 @@ import {
 import { getDefaultAppState } from "../appState";
 import { LinearElementEditor } from "../element/linearElementEditor";
 import { bumpVersion } from "../element/mutateElement";
-import { getFontString, getUpdatedTimestamp, updateActiveTool } from "../utils";
+import { getUpdatedTimestamp, updateActiveTool } from "../utils";
 import { arrayToMap } from "../utils";
 import { MarkOptional, Mutable } from "../utility-types";
 import {
   detectLineHeight,
+  getContainerElement,
   getDefaultLineHeight,
-  measureBaseline,
 } from "../element/textElement";
 import { normalizeLink } from "./url";
 
@@ -179,7 +179,6 @@ const restoreElementWithProperties = <
 
 const restoreElement = (
   element: Exclude<ExcalidrawElement, ExcalidrawSelectionElement>,
-  refreshDimensions = false,
 ): typeof element | null => {
   switch (element.type) {
     case "text":
@@ -207,11 +206,6 @@ const restoreElement = (
           : // no element height likely means programmatic use, so default
             // to a fixed line height
             getDefaultLineHeight(element.fontFamily));
-      const baseline = measureBaseline(
-        element.text,
-        getFontString(element),
-        lineHeight,
-      );
       element = restoreElementWithProperties(element, {
         fontSize,
         fontFamily,
@@ -222,7 +216,6 @@ const restoreElement = (
         originalText: element.originalText || text,
 
         lineHeight,
-        baseline,
       });
 
       // if empty text, mark as deleted. We keep in array
@@ -230,10 +223,6 @@ const restoreElement = (
       if (!text && !element.isDeleted) {
         element = { ...element, originalText: text, isDeleted: true };
         element = bumpVersion(element);
-      }
-
-      if (refreshDimensions) {
-        element = { ...element, ...refreshTextDimensions(element) };
       }
 
       return element;
@@ -295,11 +284,8 @@ const restoreElement = (
     case "rectangle":
     case "diamond":
     case "iframe":
-      return restoreElementWithProperties(element, {});
     case "embeddable":
-      return restoreElementWithProperties(element, {
-        validated: null,
-      });
+      return restoreElementWithProperties(element, {});
     case "magicframe":
     case "frame":
       return restoreElementWithProperties(element, {
@@ -429,10 +415,7 @@ export const restoreElements = (
     // filtering out selection, which is legacy, no longer kept in elements,
     // and causing issues if retained
     if (element.type !== "selection" && !isInvisiblySmallElement(element)) {
-      let migratedElement: ExcalidrawElement | null = restoreElement(
-        element,
-        opts?.refreshDimensions,
-      );
+      let migratedElement: ExcalidrawElement | null = restoreElement(element);
       if (migratedElement) {
         const localElement = localElementsMap?.get(element.id);
         if (localElement && localElement.version > migratedElement.version) {
@@ -464,6 +447,17 @@ export const restoreElements = (
       repairBoundElement(element, restoredElementsMap);
     } else if (element.boundElements) {
       repairContainerElement(element, restoredElementsMap);
+    }
+
+    if (opts.refreshDimensions && isTextElement(element)) {
+      Object.assign(
+        element,
+        refreshTextDimensions(
+          element,
+          getContainerElement(element, restoredElementsMap),
+          restoredElementsMap,
+        ),
+      );
     }
   }
 

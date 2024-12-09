@@ -1,6 +1,6 @@
 import type { Radians } from "../../math";
 import {
-  point,
+  pointFrom,
   pointScaleFromOrigin,
   pointTranslate,
   vector,
@@ -41,7 +41,6 @@ import { mutateElement } from "./mutateElement";
 import { isBindableElement, isRectanguloidElement } from "./typeChecks";
 import type {
   ExcalidrawElbowArrowElement,
-  FixedPointBinding,
   NonDeletedSceneElementsMap,
   SceneElementsMap,
 } from "./types";
@@ -73,13 +72,12 @@ export const mutateElbowArrow = (
   elementsMap: NonDeletedSceneElementsMap | SceneElementsMap,
   nextPoints: readonly LocalPoint[],
   offset?: Vector,
-  otherUpdates?: {
-    startBinding?: FixedPointBinding | null;
-    endBinding?: FixedPointBinding | null;
-  },
+  otherUpdates?: Omit<
+    ElementUpdate<ExcalidrawElbowArrowElement>,
+    "angle" | "x" | "y" | "width" | "height" | "elbowed" | "points"
+  >,
   options?: {
     isDragging?: boolean;
-    disableBinding?: boolean;
     informMutation?: boolean;
   },
 ) => {
@@ -745,13 +743,13 @@ const getDonglePosition = (
 ): GlobalPoint => {
   switch (heading) {
     case HEADING_UP:
-      return point(p[0], bounds[1]);
+      return pointFrom(p[0], bounds[1]);
     case HEADING_RIGHT:
-      return point(bounds[2], p[1]);
+      return pointFrom(bounds[2], p[1]);
     case HEADING_DOWN:
-      return point(p[0], bounds[3]);
+      return pointFrom(p[0], bounds[3]);
   }
-  return point(bounds[0], p[1]);
+  return pointFrom(bounds[0], p[1]);
 };
 
 const estimateSegmentCount = (

@@ -20,7 +20,7 @@ import { getAtomicUnits, getStepSizedValue, isPropertyEditable } from "./utils";
 import { getElementsInAtomicUnit, resizeElement } from "./utils";
 import type { AtomicUnit } from "./utils";
 import { MIN_WIDTH_OR_HEIGHT } from "../../constants";
-import { point, type GlobalPoint } from "../../../math";
+import { pointFrom, type GlobalPoint } from "../../../math";
 
 interface MultiDimensionProps {
   property: "width" | "height";
@@ -69,7 +69,6 @@ const resizeElementInGroup = (
   originalElementsMap: ElementsMap,
 ) => {
   const updates = getResizedUpdates(anchorX, anchorY, scale, origElement);
-  const { width: oldWidth, height: oldHeight } = latestElement;
 
   mutateElement(latestElement, updates, false);
   const boundTextElement = getBoundTextElement(
@@ -79,7 +78,7 @@ const resizeElementInGroup = (
   if (boundTextElement) {
     const newFontSize = boundTextElement.fontSize * scale;
     updateBoundElements(latestElement, elementsMap, {
-      oldSize: { width: oldWidth, height: oldHeight },
+      newSize: { width: updates.width, height: updates.height },
     });
     const latestBoundTextElement = elementsMap.get(boundTextElement.id);
     if (latestBoundTextElement && isTextElement(latestBoundTextElement)) {
@@ -182,7 +181,7 @@ const handleDimensionChange: DragInputCallbackType<
           nextHeight,
           initialHeight,
           aspectRatio,
-          point(x1, y1),
+          pointFrom(x1, y1),
           property,
           latestElements,
           originalElements,
@@ -287,7 +286,7 @@ const handleDimensionChange: DragInputCallbackType<
         nextHeight,
         initialHeight,
         aspectRatio,
-        point(x1, y1),
+        pointFrom(x1, y1),
         property,
         latestElements,
         originalElements,

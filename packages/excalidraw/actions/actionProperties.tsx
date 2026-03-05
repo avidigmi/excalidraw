@@ -1,20 +1,91 @@
+import { pointFrom } from "@excalidraw/math";
+
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { AppClassProperties, AppState, Primitive } from "../types";
-import type { StoreActionType } from "../store";
+
 import {
   DEFAULT_ELEMENT_BACKGROUND_COLOR_PALETTE,
   DEFAULT_ELEMENT_BACKGROUND_PICKS,
   DEFAULT_ELEMENT_STROKE_COLOR_PALETTE,
   DEFAULT_ELEMENT_STROKE_PICKS,
-} from "../colors";
+  ARROW_TYPE,
+  DEFAULT_FONT_FAMILY,
+  DEFAULT_FONT_SIZE,
+  FONT_FAMILY,
+  ROUNDNESS,
+  STROKE_WIDTH,
+  VERTICAL_ALIGN,
+  KEYS,
+  randomInteger,
+  arrayToMap,
+  getFontFamilyString,
+  getLineHeight,
+  isTransparent,
+  reduceToCommonValue,
+  invariant,
+  FONT_SIZES,
+} from "@excalidraw/common";
+
+import { canBecomePolygon, getNonDeletedElements } from "@excalidraw/element";
+
+import {
+  bindBindingElement,
+  calculateFixedPointForElbowArrowBinding,
+  updateBoundElements,
+} from "@excalidraw/element";
+
+import { LinearElementEditor } from "@excalidraw/element";
+
+import { newElementWith } from "@excalidraw/element";
+
+import {
+  getBoundTextElement,
+  redrawTextBoundingBox,
+} from "@excalidraw/element";
+
+import {
+  isArrowElement,
+  isBoundToContainer,
+  isElbowArrow,
+  isLinearElement,
+  isLineElement,
+  isTextElement,
+  isUsingAdaptiveRadius,
+} from "@excalidraw/element";
+
+import { hasStrokeColor } from "@excalidraw/element";
+
+import {
+  updateElbowArrowPoints,
+  CaptureUpdateAction,
+  toggleLinePolygonState,
+} from "@excalidraw/element";
+
+import { deriveStylesPanelMode } from "@excalidraw/common";
+
+import type { LocalPoint, Radians } from "@excalidraw/math";
+
+import type {
+  Arrowhead,
+  ElementsMap,
+  ExcalidrawBindableElement,
+  ExcalidrawElement,
+  ExcalidrawLinearElement,
+  ExcalidrawTextElement,
+  FontFamilyValues,
+  TextAlign,
+  VerticalAlign,
+} from "@excalidraw/element/types";
+
+import type { Scene } from "@excalidraw/element";
+
+import type { CaptureUpdateActionType } from "@excalidraw/element";
+
 import { trackEvent } from "../analytics";
-import { ButtonIconSelect } from "../components/ButtonIconSelect";
+import { RadioSelection } from "../components/RadioSelection";
 import { ColorPicker } from "../components/ColorPicker/ColorPicker";
-import { IconPicker } from "../components/IconPicker";
 import { FontPicker } from "../components/FontPicker/FontPicker";
-// TODO barnabasmolnar/editor-redesign
-// TextAlignTopIcon, TextAlignBottomIcon,TextAlignMiddleIcon,
-// ArrowHead icons
+import { IconPicker } from "../components/IconPicker";
+import { Range } from "../components/Range";
 import {
   ArrowheadArrowIcon,
   ArrowheadBarIcon,
@@ -53,72 +124,41 @@ import {
   sharpArrowIcon,
   roundArrowIcon,
   elbowArrowIcon,
+  ArrowheadCrowfootIcon,
+  ArrowheadCrowfootOneIcon,
+  ArrowheadCrowfootOneOrManyIcon,
 } from "../components/icons";
-import {
-  ARROW_TYPE,
-  DEFAULT_FONT_FAMILY,
-  DEFAULT_FONT_SIZE,
-  FONT_FAMILY,
-  ROUNDNESS,
-  STROKE_WIDTH,
-  VERTICAL_ALIGN,
-} from "../constants";
-import {
-  getNonDeletedElements,
-  isTextElement,
-  redrawTextBoundingBox,
-} from "../element";
-import { mutateElement, newElementWith } from "../element/mutateElement";
-import { getBoundTextElement } from "../element/textElement";
-import {
-  isArrowElement,
-  isBoundToContainer,
-  isElbowArrow,
-  isLinearElement,
-  isUsingAdaptiveRadius,
-} from "../element/typeChecks";
-import type {
-  Arrowhead,
-  ExcalidrawBindableElement,
-  ExcalidrawElement,
-  ExcalidrawLinearElement,
-  ExcalidrawTextElement,
-  FontFamilyValues,
-  TextAlign,
-  VerticalAlign,
-} from "../element/types";
+
+import { Fonts } from "../fonts";
 import { getLanguage, t } from "../i18n";
-import { KEYS } from "../keys";
-import { randomInteger } from "../random";
 import {
   canHaveArrowheads,
-  getCommonAttributeOfSelectedElements,
   getSelectedElements,
   getTargetElements,
   isSomeElementSelected,
 } from "../scene";
-import { hasStrokeColor } from "../scene/comparisons";
+
 import {
-  arrayToMap,
-  getFontFamilyString,
-  getShortcutKey,
-  tupleToCoors,
-} from "../utils";
+  withCaretPositionPreservation,
+  restoreCaretPosition,
+} from "../hooks/useTextEditorFocus";
+
+import { getShortcutKey } from "../shortcut";
+
 import { register } from "./register";
-import { StoreAction } from "../store";
-import { Fonts, getLineHeight } from "../fonts";
-import {
-  bindLinearElement,
-  bindPointToSnapToElementOutline,
-  calculateFixedPointForElbowArrowBinding,
-  getHoveredElementForBinding,
-} from "../element/binding";
-import { mutateElbowArrow } from "../element/routing";
-import { LinearElementEditor } from "../element/linearElementEditor";
-import type { LocalPoint } from "../../math";
-import { pointFrom, vector } from "../../math";
+
+import type { AppClassProperties, AppState, Primitive } from "../types";
 
 const FONT_SIZE_RELATIVE_INCREASE_STEP = 0.1;
+
+const getStylesPanelInfo = (app: AppClassProperties) => {
+  const stylesPanelMode = deriveStylesPanelMode(app.editorInterface);
+  return {
+    stylesPanelMode,
+    isCompact: stylesPanelMode !== "full",
+    isMobile: stylesPanelMode === "mobile",
+  } as const;
+};
 
 export const changeProperty = (
   elements: readonly ExcalidrawElement[],
@@ -145,12 +185,12 @@ export const changeProperty = (
 
 export const getFormValue = function <T extends Primitive>(
   elements: readonly ExcalidrawElement[],
-  appState: AppState,
+  app: AppClassProperties,
   getAttribute: (element: ExcalidrawElement) => T,
   isRelevantElement: true | ((element: ExcalidrawElement) => boolean),
   defaultValue: T | ((isSomeElementSelected: boolean) => T),
 ): T {
-  const editingTextElement = appState.editingTextElement;
+  const editingTextElement = app.state.editingTextElement;
   const nonDeletedElements = getNonDeletedElements(elements);
 
   let ret: T | null = null;
@@ -160,17 +200,17 @@ export const getFormValue = function <T extends Primitive>(
   }
 
   if (!ret) {
-    const hasSelection = isSomeElementSelected(nonDeletedElements, appState);
+    const hasSelection = isSomeElementSelected(nonDeletedElements, app.state);
 
     if (hasSelection) {
+      const selectedElements = app.scene.getSelectedElements(app.state);
+      const targetElements =
+        isRelevantElement === true
+          ? selectedElements
+          : selectedElements.filter((el) => isRelevantElement(el));
+
       ret =
-        getCommonAttributeOfSelectedElements(
-          isRelevantElement === true
-            ? nonDeletedElements
-            : nonDeletedElements.filter((el) => isRelevantElement(el)),
-          appState,
-          getAttribute,
-        ) ??
+        reduceToCommonValue(targetElements, getAttribute) ??
         (typeof defaultValue === "function"
           ? defaultValue(true)
           : defaultValue);
@@ -186,25 +226,22 @@ export const getFormValue = function <T extends Primitive>(
 const offsetElementAfterFontResize = (
   prevElement: ExcalidrawTextElement,
   nextElement: ExcalidrawTextElement,
+  scene: Scene,
 ) => {
   if (isBoundToContainer(nextElement) || !nextElement.autoResize) {
     return nextElement;
   }
-  return mutateElement(
-    nextElement,
-    {
-      x:
-        prevElement.textAlign === "left"
-          ? prevElement.x
-          : prevElement.x +
-            (prevElement.width - nextElement.width) /
-              (prevElement.textAlign === "center" ? 2 : 1),
-      // centering vertically is non-standard, but for Excalidraw I think
-      // it makes sense
-      y: prevElement.y + (prevElement.height - nextElement.height) / 2,
-    },
-    false,
-  );
+  return scene.mutateElement(nextElement, {
+    x:
+      prevElement.textAlign === "left"
+        ? prevElement.x
+        : prevElement.x +
+          (prevElement.width - nextElement.width) /
+            (prevElement.textAlign === "center" ? 2 : 1),
+    // centering vertically is non-standard, but for Excalidraw I think
+    // it makes sense
+    y: prevElement.y + (prevElement.height - nextElement.height) / 2,
+  });
 };
 
 const changeFontSize = (
@@ -216,33 +253,47 @@ const changeFontSize = (
 ) => {
   const newFontSizes = new Set<number>();
 
+  const updatedElements = changeProperty(
+    elements,
+    appState,
+    (oldElement) => {
+      if (isTextElement(oldElement)) {
+        const newFontSize = getNewFontSize(oldElement);
+        newFontSizes.add(newFontSize);
+
+        let newElement: ExcalidrawTextElement = newElementWith(oldElement, {
+          fontSize: newFontSize,
+        });
+        redrawTextBoundingBox(
+          newElement,
+          app.scene.getContainerElement(oldElement),
+          app.scene,
+        );
+
+        newElement = offsetElementAfterFontResize(
+          oldElement,
+          newElement,
+          app.scene,
+        );
+
+        return newElement;
+      }
+      return oldElement;
+    },
+    true,
+  );
+
+  // Update arrow elements after text elements have been updated
+  getSelectedElements(elements, appState, {
+    includeBoundTextElement: true,
+  }).forEach((element) => {
+    if (isTextElement(element)) {
+      updateBoundElements(element, app.scene);
+    }
+  });
+
   return {
-    elements: changeProperty(
-      elements,
-      appState,
-      (oldElement) => {
-        if (isTextElement(oldElement)) {
-          const newFontSize = getNewFontSize(oldElement);
-          newFontSizes.add(newFontSize);
-
-          let newElement: ExcalidrawTextElement = newElementWith(oldElement, {
-            fontSize: newFontSize,
-          });
-          redrawTextBoundingBox(
-            newElement,
-            app.scene.getContainerElement(oldElement),
-            app.scene.getNonDeletedElementsMap(),
-          );
-
-          newElement = offsetElementAfterFontResize(oldElement, newElement);
-
-          return newElement;
-        }
-
-        return oldElement;
-      },
-      true,
-    ),
+    elements: updatedElements,
     appState: {
       ...appState,
       // update state only if we've set all select text elements to
@@ -252,19 +303,21 @@ const changeFontSize = (
           ? [...newFontSizes][0]
           : fallbackValue ?? appState.currentItemFontSize,
     },
-    storeAction: StoreAction.CAPTURE,
+    captureUpdate: CaptureUpdateAction.IMMEDIATELY,
   };
 };
 
 // -----------------------------------------------------------------------------
 
-export const actionChangeStrokeColor = register({
+export const actionChangeStrokeColor = register<
+  Pick<AppState, "currentItemStrokeColor">
+>({
   name: "changeStrokeColor",
   label: "labels.stroke",
   trackEvent: false,
   perform: (elements, appState, value) => {
     return {
-      ...(value.currentItemStrokeColor && {
+      ...(value?.currentItemStrokeColor && {
         elements: changeProperty(
           elements,
           appState,
@@ -282,82 +335,130 @@ export const actionChangeStrokeColor = register({
         ...appState,
         ...value,
       },
-      storeAction: !!value.currentItemStrokeColor
-        ? StoreAction.CAPTURE
-        : StoreAction.NONE,
+      captureUpdate: !!value?.currentItemStrokeColor
+        ? CaptureUpdateAction.IMMEDIATELY
+        : CaptureUpdateAction.EVENTUALLY,
     };
   },
-  PanelComponent: ({ elements, appState, updateData, appProps }) => (
-    <>
-      <h3 aria-hidden="true">{t("labels.stroke")}</h3>
-      <ColorPicker
-        topPicks={DEFAULT_ELEMENT_STROKE_PICKS}
-        palette={DEFAULT_ELEMENT_STROKE_COLOR_PALETTE}
-        type="elementStroke"
-        label={t("labels.stroke")}
-        color={getFormValue(
-          elements,
-          appState,
-          (element) => element.strokeColor,
-          true,
-          appState.currentItemStrokeColor,
+  PanelComponent: ({ elements, appState, updateData, app, data }) => {
+    const { stylesPanelMode } = getStylesPanelInfo(app);
+
+    return (
+      <>
+        {stylesPanelMode === "full" && (
+          <h3 aria-hidden="true">{t("labels.stroke")}</h3>
         )}
-        onChange={(color) => updateData({ currentItemStrokeColor: color })}
-        elements={elements}
-        appState={appState}
-        updateData={updateData}
-      />
-    </>
-  ),
+        <ColorPicker
+          topPicks={DEFAULT_ELEMENT_STROKE_PICKS}
+          palette={DEFAULT_ELEMENT_STROKE_COLOR_PALETTE}
+          type="elementStroke"
+          label={t("labels.stroke")}
+          color={getFormValue(
+            elements,
+            app,
+            (element) => element.strokeColor,
+            true,
+            (hasSelection) =>
+              !hasSelection ? appState.currentItemStrokeColor : null,
+          )}
+          onChange={(color) => updateData({ currentItemStrokeColor: color })}
+          elements={elements}
+          appState={appState}
+          updateData={updateData}
+        />
+      </>
+    );
+  },
 });
 
-export const actionChangeBackgroundColor = register({
+export const actionChangeBackgroundColor = register<
+  Pick<AppState, "currentItemBackgroundColor" | "viewBackgroundColor">
+>({
   name: "changeBackgroundColor",
   label: "labels.changeBackground",
   trackEvent: false,
-  perform: (elements, appState, value) => {
-    return {
-      ...(value.currentItemBackgroundColor && {
-        elements: changeProperty(elements, appState, (el) =>
-          newElementWith(el, {
+  perform: (elements, appState, value, app) => {
+    if (!value?.currentItemBackgroundColor) {
+      return {
+        appState: {
+          ...appState,
+          ...value,
+        },
+        captureUpdate: CaptureUpdateAction.EVENTUALLY,
+      };
+    }
+
+    let nextElements;
+
+    const selectedElements = app.scene.getSelectedElements(appState);
+    const shouldEnablePolygon =
+      !isTransparent(value.currentItemBackgroundColor) &&
+      selectedElements.every(
+        (el) => isLineElement(el) && canBecomePolygon(el.points),
+      );
+
+    if (shouldEnablePolygon) {
+      const selectedElementsMap = arrayToMap(selectedElements);
+      nextElements = elements.map((el) => {
+        if (selectedElementsMap.has(el.id) && isLineElement(el)) {
+          return newElementWith(el, {
             backgroundColor: value.currentItemBackgroundColor,
-          }),
-        ),
-      }),
+            ...toggleLinePolygonState(el, true),
+          });
+        }
+        return el;
+      });
+    } else {
+      nextElements = changeProperty(elements, appState, (el) =>
+        newElementWith(el, {
+          backgroundColor: value.currentItemBackgroundColor,
+        }),
+      );
+    }
+
+    return {
+      elements: nextElements,
       appState: {
         ...appState,
         ...value,
       },
-      storeAction: !!value.currentItemBackgroundColor
-        ? StoreAction.CAPTURE
-        : StoreAction.NONE,
+      captureUpdate: CaptureUpdateAction.IMMEDIATELY,
     };
   },
-  PanelComponent: ({ elements, appState, updateData, appProps }) => (
-    <>
-      <h3 aria-hidden="true">{t("labels.background")}</h3>
-      <ColorPicker
-        topPicks={DEFAULT_ELEMENT_BACKGROUND_PICKS}
-        palette={DEFAULT_ELEMENT_BACKGROUND_COLOR_PALETTE}
-        type="elementBackground"
-        label={t("labels.background")}
-        color={getFormValue(
-          elements,
-          appState,
-          (element) => element.backgroundColor,
-          true,
-          appState.currentItemBackgroundColor,
+  PanelComponent: ({ elements, appState, updateData, app, data }) => {
+    const { stylesPanelMode } = getStylesPanelInfo(app);
+
+    return (
+      <>
+        {stylesPanelMode === "full" && (
+          <h3 aria-hidden="true">{t("labels.background")}</h3>
         )}
-        onChange={(color) => updateData({ currentItemBackgroundColor: color })}
-        elements={elements}
-        appState={appState}
-        updateData={updateData}
-      />
-    </>
-  ),
+        <ColorPicker
+          topPicks={DEFAULT_ELEMENT_BACKGROUND_PICKS}
+          palette={DEFAULT_ELEMENT_BACKGROUND_COLOR_PALETTE}
+          type="elementBackground"
+          label={t("labels.background")}
+          color={getFormValue(
+            elements,
+            app,
+            (element) => element.backgroundColor,
+            true,
+            (hasSelection) =>
+              !hasSelection ? appState.currentItemBackgroundColor : null,
+          )}
+          onChange={(color) =>
+            updateData({ currentItemBackgroundColor: color })
+          }
+          elements={elements}
+          appState={appState}
+          updateData={updateData}
+        />
+      </>
+    );
+  },
 });
 
-export const actionChangeFillStyle = register({
+export const actionChangeFillStyle = register<ExcalidrawElement["fillStyle"]>({
   name: "changeFillStyle",
   label: "labels.fill",
   trackEvent: false,
@@ -365,7 +466,9 @@ export const actionChangeFillStyle = register({
     trackEvent(
       "element",
       "changeFillStyle",
-      `${value} (${app.device.editor.isMobile ? "mobile" : "desktop"})`,
+      `${value} (${
+        app.editorInterface.formFactor === "phone" ? "mobile" : "desktop"
+      })`,
     );
     return {
       elements: changeProperty(elements, appState, (el) =>
@@ -374,10 +477,10 @@ export const actionChangeFillStyle = register({
         }),
       ),
       appState: { ...appState, currentItemFillStyle: value },
-      storeAction: StoreAction.CAPTURE,
+      captureUpdate: CaptureUpdateAction.IMMEDIATELY,
     };
   },
-  PanelComponent: ({ elements, appState, updateData }) => {
+  PanelComponent: ({ elements, appState, updateData, app }) => {
     const selectedElements = getSelectedElements(elements, appState);
     const allElementsZigZag =
       selectedElements.length > 0 &&
@@ -386,56 +489,60 @@ export const actionChangeFillStyle = register({
     return (
       <fieldset>
         <legend>{t("labels.fill")}</legend>
-        <ButtonIconSelect
-          type="button"
-          options={[
-            {
-              value: "hachure",
-              text: `${
-                allElementsZigZag ? t("labels.zigzag") : t("labels.hachure")
-              } (${getShortcutKey("Alt-Click")})`,
-              icon: allElementsZigZag ? FillZigZagIcon : FillHachureIcon,
-              active: allElementsZigZag ? true : undefined,
-              testId: `fill-hachure`,
-            },
-            {
-              value: "cross-hatch",
-              text: t("labels.crossHatch"),
-              icon: FillCrossHatchIcon,
-              testId: `fill-cross-hatch`,
-            },
-            {
-              value: "solid",
-              text: t("labels.solid"),
-              icon: FillSolidIcon,
-              testId: `fill-solid`,
-            },
-          ]}
-          value={getFormValue(
-            elements,
-            appState,
-            (element) => element.fillStyle,
-            (element) => element.hasOwnProperty("fillStyle"),
-            (hasSelection) =>
-              hasSelection ? null : appState.currentItemFillStyle,
-          )}
-          onClick={(value, event) => {
-            const nextValue =
-              event.altKey &&
-              value === "hachure" &&
-              selectedElements.every((el) => el.fillStyle === "hachure")
-                ? "zigzag"
-                : value;
+        <div className="buttonList">
+          <RadioSelection
+            type="button"
+            options={[
+              {
+                value: "hachure",
+                text: `${
+                  allElementsZigZag ? t("labels.zigzag") : t("labels.hachure")
+                } (${getShortcutKey("Alt-Click")})`,
+                icon: allElementsZigZag ? FillZigZagIcon : FillHachureIcon,
+                active: allElementsZigZag ? true : undefined,
+                testId: `fill-hachure`,
+              },
+              {
+                value: "cross-hatch",
+                text: t("labels.crossHatch"),
+                icon: FillCrossHatchIcon,
+                testId: `fill-cross-hatch`,
+              },
+              {
+                value: "solid",
+                text: t("labels.solid"),
+                icon: FillSolidIcon,
+                testId: `fill-solid`,
+              },
+            ]}
+            value={getFormValue(
+              elements,
+              app,
+              (element) => element.fillStyle,
+              (element) => element.hasOwnProperty("fillStyle"),
+              (hasSelection) =>
+                hasSelection ? null : appState.currentItemFillStyle,
+            )}
+            onClick={(value, event) => {
+              const nextValue =
+                event.altKey &&
+                value === "hachure" &&
+                selectedElements.every((el) => el.fillStyle === "hachure")
+                  ? "zigzag"
+                  : value;
 
-            updateData(nextValue);
-          }}
-        />
+              updateData(nextValue);
+            }}
+          />
+        </div>
       </fieldset>
     );
   },
 });
 
-export const actionChangeStrokeWidth = register({
+export const actionChangeStrokeWidth = register<
+  ExcalidrawElement["strokeWidth"]
+>({
   name: "changeStrokeWidth",
   label: "labels.strokeWidth",
   trackEvent: false,
@@ -447,49 +554,51 @@ export const actionChangeStrokeWidth = register({
         }),
       ),
       appState: { ...appState, currentItemStrokeWidth: value },
-      storeAction: StoreAction.CAPTURE,
+      captureUpdate: CaptureUpdateAction.IMMEDIATELY,
     };
   },
-  PanelComponent: ({ elements, appState, updateData }) => (
+  PanelComponent: ({ elements, appState, updateData, app, data }) => (
     <fieldset>
       <legend>{t("labels.strokeWidth")}</legend>
-      <ButtonIconSelect
-        group="stroke-width"
-        options={[
-          {
-            value: STROKE_WIDTH.thin,
-            text: t("labels.thin"),
-            icon: StrokeWidthBaseIcon,
-            testId: "strokeWidth-thin",
-          },
-          {
-            value: STROKE_WIDTH.bold,
-            text: t("labels.bold"),
-            icon: StrokeWidthBoldIcon,
-            testId: "strokeWidth-bold",
-          },
-          {
-            value: STROKE_WIDTH.extraBold,
-            text: t("labels.extraBold"),
-            icon: StrokeWidthExtraBoldIcon,
-            testId: "strokeWidth-extraBold",
-          },
-        ]}
-        value={getFormValue(
-          elements,
-          appState,
-          (element) => element.strokeWidth,
-          (element) => element.hasOwnProperty("strokeWidth"),
-          (hasSelection) =>
-            hasSelection ? null : appState.currentItemStrokeWidth,
-        )}
-        onChange={(value) => updateData(value)}
-      />
+      <div className="buttonList">
+        <RadioSelection
+          group="stroke-width"
+          options={[
+            {
+              value: STROKE_WIDTH.thin,
+              text: t("labels.thin"),
+              icon: StrokeWidthBaseIcon,
+              testId: "strokeWidth-thin",
+            },
+            {
+              value: STROKE_WIDTH.bold,
+              text: t("labels.bold"),
+              icon: StrokeWidthBoldIcon,
+              testId: "strokeWidth-bold",
+            },
+            {
+              value: STROKE_WIDTH.extraBold,
+              text: t("labels.extraBold"),
+              icon: StrokeWidthExtraBoldIcon,
+              testId: "strokeWidth-extraBold",
+            },
+          ]}
+          value={getFormValue(
+            elements,
+            app,
+            (element) => element.strokeWidth,
+            (element) => element.hasOwnProperty("strokeWidth"),
+            (hasSelection) =>
+              hasSelection ? null : appState.currentItemStrokeWidth,
+          )}
+          onChange={(value) => updateData(value)}
+        />
+      </div>
     </fieldset>
   ),
 });
 
-export const actionChangeSloppiness = register({
+export const actionChangeSloppiness = register<ExcalidrawElement["roughness"]>({
   name: "changeSloppiness",
   label: "labels.sloppiness",
   trackEvent: false,
@@ -502,46 +611,50 @@ export const actionChangeSloppiness = register({
         }),
       ),
       appState: { ...appState, currentItemRoughness: value },
-      storeAction: StoreAction.CAPTURE,
+      captureUpdate: CaptureUpdateAction.IMMEDIATELY,
     };
   },
-  PanelComponent: ({ elements, appState, updateData }) => (
+  PanelComponent: ({ elements, appState, updateData, app, data }) => (
     <fieldset>
       <legend>{t("labels.sloppiness")}</legend>
-      <ButtonIconSelect
-        group="sloppiness"
-        options={[
-          {
-            value: 0,
-            text: t("labels.architect"),
-            icon: SloppinessArchitectIcon,
-          },
-          {
-            value: 1,
-            text: t("labels.artist"),
-            icon: SloppinessArtistIcon,
-          },
-          {
-            value: 2,
-            text: t("labels.cartoonist"),
-            icon: SloppinessCartoonistIcon,
-          },
-        ]}
-        value={getFormValue(
-          elements,
-          appState,
-          (element) => element.roughness,
-          (element) => element.hasOwnProperty("roughness"),
-          (hasSelection) =>
-            hasSelection ? null : appState.currentItemRoughness,
-        )}
-        onChange={(value) => updateData(value)}
-      />
+      <div className="buttonList">
+        <RadioSelection
+          group="sloppiness"
+          options={[
+            {
+              value: 0,
+              text: t("labels.architect"),
+              icon: SloppinessArchitectIcon,
+            },
+            {
+              value: 1,
+              text: t("labels.artist"),
+              icon: SloppinessArtistIcon,
+            },
+            {
+              value: 2,
+              text: t("labels.cartoonist"),
+              icon: SloppinessCartoonistIcon,
+            },
+          ]}
+          value={getFormValue(
+            elements,
+            app,
+            (element) => element.roughness,
+            (element) => element.hasOwnProperty("roughness"),
+            (hasSelection) =>
+              hasSelection ? null : appState.currentItemRoughness,
+          )}
+          onChange={(value) => updateData(value)}
+        />
+      </div>
     </fieldset>
   ),
 });
 
-export const actionChangeStrokeStyle = register({
+export const actionChangeStrokeStyle = register<
+  ExcalidrawElement["strokeStyle"]
+>({
   name: "changeStrokeStyle",
   label: "labels.strokeStyle",
   trackEvent: false,
@@ -553,46 +666,48 @@ export const actionChangeStrokeStyle = register({
         }),
       ),
       appState: { ...appState, currentItemStrokeStyle: value },
-      storeAction: StoreAction.CAPTURE,
+      captureUpdate: CaptureUpdateAction.IMMEDIATELY,
     };
   },
-  PanelComponent: ({ elements, appState, updateData }) => (
+  PanelComponent: ({ elements, appState, updateData, app, data }) => (
     <fieldset>
       <legend>{t("labels.strokeStyle")}</legend>
-      <ButtonIconSelect
-        group="strokeStyle"
-        options={[
-          {
-            value: "solid",
-            text: t("labels.strokeStyle_solid"),
-            icon: StrokeWidthBaseIcon,
-          },
-          {
-            value: "dashed",
-            text: t("labels.strokeStyle_dashed"),
-            icon: StrokeStyleDashedIcon,
-          },
-          {
-            value: "dotted",
-            text: t("labels.strokeStyle_dotted"),
-            icon: StrokeStyleDottedIcon,
-          },
-        ]}
-        value={getFormValue(
-          elements,
-          appState,
-          (element) => element.strokeStyle,
-          (element) => element.hasOwnProperty("strokeStyle"),
-          (hasSelection) =>
-            hasSelection ? null : appState.currentItemStrokeStyle,
-        )}
-        onChange={(value) => updateData(value)}
-      />
+      <div className="buttonList">
+        <RadioSelection
+          group="strokeStyle"
+          options={[
+            {
+              value: "solid",
+              text: t("labels.strokeStyle_solid"),
+              icon: StrokeWidthBaseIcon,
+            },
+            {
+              value: "dashed",
+              text: t("labels.strokeStyle_dashed"),
+              icon: StrokeStyleDashedIcon,
+            },
+            {
+              value: "dotted",
+              text: t("labels.strokeStyle_dotted"),
+              icon: StrokeStyleDottedIcon,
+            },
+          ]}
+          value={getFormValue(
+            elements,
+            app,
+            (element) => element.strokeStyle,
+            (element) => element.hasOwnProperty("strokeStyle"),
+            (hasSelection) =>
+              hasSelection ? null : appState.currentItemStrokeStyle,
+          )}
+          onChange={(value) => updateData(value)}
+        />
+      </div>
     </fieldset>
   ),
 });
 
-export const actionChangeOpacity = register({
+export const actionChangeOpacity = register<ExcalidrawElement["opacity"]>({
   name: "changeOpacity",
   label: "labels.opacity",
   trackEvent: false,
@@ -608,102 +723,108 @@ export const actionChangeOpacity = register({
         true,
       ),
       appState: { ...appState, currentItemOpacity: value },
-      storeAction: StoreAction.CAPTURE,
+      captureUpdate: CaptureUpdateAction.IMMEDIATELY,
     };
   },
-  PanelComponent: ({ elements, appState, updateData }) => (
-    <label className="control-label">
-      {t("labels.opacity")}
-      <input
-        type="range"
-        min="0"
-        max="100"
-        step="10"
-        onChange={(event) => updateData(+event.target.value)}
-        value={
-          getFormValue(
-            elements,
-            appState,
-            (element) => element.opacity,
-            true,
-            appState.currentItemOpacity,
-          ) ?? undefined
-        }
-      />
-    </label>
+  PanelComponent: ({ app, updateData }) => (
+    <Range updateData={updateData} app={app} testId="opacity" />
   ),
 });
 
-export const actionChangeFontSize = register({
-  name: "changeFontSize",
-  label: "labels.fontSize",
-  trackEvent: false,
-  perform: (elements, appState, value, app) => {
-    return changeFontSize(elements, appState, app, () => value, value);
+export const actionChangeFontSize = register<ExcalidrawTextElement["fontSize"]>(
+  {
+    name: "changeFontSize",
+    label: "labels.fontSize",
+    trackEvent: false,
+    perform: (elements, appState, value, app) => {
+      return changeFontSize(
+        elements,
+        appState,
+        app,
+        () => {
+          invariant(value, "actionChangeFontSize: Expected a font size value");
+          return value;
+        },
+        value,
+      );
+    },
+    PanelComponent: ({ elements, appState, updateData, app, data }) => {
+      const { isCompact } = getStylesPanelInfo(app);
+
+      return (
+        <fieldset>
+          <legend>{t("labels.fontSize")}</legend>
+          <div className="buttonList">
+            <RadioSelection
+              group="font-size"
+              options={[
+                {
+                  value: FONT_SIZES.sm,
+                  text: t("labels.small"),
+                  icon: FontSizeSmallIcon,
+                  testId: "fontSize-small",
+                },
+                {
+                  value: FONT_SIZES.md,
+                  text: t("labels.medium"),
+                  icon: FontSizeMediumIcon,
+                  testId: "fontSize-medium",
+                },
+                {
+                  value: FONT_SIZES.lg,
+                  text: t("labels.large"),
+                  icon: FontSizeLargeIcon,
+                  testId: "fontSize-large",
+                },
+                {
+                  value: FONT_SIZES.xl,
+                  text: t("labels.veryLarge"),
+                  icon: FontSizeExtraLargeIcon,
+                  testId: "fontSize-veryLarge",
+                },
+              ]}
+              value={getFormValue(
+                elements,
+                app,
+                (element) => {
+                  if (isTextElement(element)) {
+                    return element.fontSize;
+                  }
+                  const boundTextElement = getBoundTextElement(
+                    element,
+                    app.scene.getNonDeletedElementsMap(),
+                  );
+                  if (boundTextElement) {
+                    return boundTextElement.fontSize;
+                  }
+                  return null;
+                },
+                (element) =>
+                  isTextElement(element) ||
+                  getBoundTextElement(
+                    element,
+                    app.scene.getNonDeletedElementsMap(),
+                  ) !== null,
+                (hasSelection) =>
+                  hasSelection
+                    ? null
+                    : appState.currentItemFontSize || DEFAULT_FONT_SIZE,
+              )}
+              onChange={(value) => {
+                withCaretPositionPreservation(
+                  () => updateData(value),
+                  isCompact,
+                  !!appState.editingTextElement,
+                  data?.onPreventClose,
+                );
+              }}
+            />
+          </div>
+        </fieldset>
+      );
+    },
   },
-  PanelComponent: ({ elements, appState, updateData, app }) => (
-    <fieldset>
-      <legend>{t("labels.fontSize")}</legend>
-      <ButtonIconSelect
-        group="font-size"
-        options={[
-          {
-            value: 16,
-            text: t("labels.small"),
-            icon: FontSizeSmallIcon,
-            testId: "fontSize-small",
-          },
-          {
-            value: 20,
-            text: t("labels.medium"),
-            icon: FontSizeMediumIcon,
-            testId: "fontSize-medium",
-          },
-          {
-            value: 28,
-            text: t("labels.large"),
-            icon: FontSizeLargeIcon,
-            testId: "fontSize-large",
-          },
-          {
-            value: 36,
-            text: t("labels.veryLarge"),
-            icon: FontSizeExtraLargeIcon,
-            testId: "fontSize-veryLarge",
-          },
-        ]}
-        value={getFormValue(
-          elements,
-          appState,
-          (element) => {
-            if (isTextElement(element)) {
-              return element.fontSize;
-            }
-            const boundTextElement = getBoundTextElement(
-              element,
-              app.scene.getNonDeletedElementsMap(),
-            );
-            if (boundTextElement) {
-              return boundTextElement.fontSize;
-            }
-            return null;
-          },
-          (element) =>
-            isTextElement(element) ||
-            getBoundTextElement(
-              element,
-              app.scene.getNonDeletedElementsMap(),
-            ) !== null,
-          (hasSelection) =>
-            hasSelection
-              ? null
-              : appState.currentItemFontSize || DEFAULT_FONT_SIZE,
-        )}
-        onChange={(value) => updateData(value)}
-      />
-    </fieldset>
-  ),
-});
+);
 
 export const actionDecreaseFontSize = register({
   name: "decreaseFontSize",
@@ -756,14 +877,17 @@ type ChangeFontFamilyData = Partial<
   >
 > & {
   /** cache of selected & editing elements populated on opened popup */
-  cachedElements?: Map<string, ExcalidrawElement>;
+  cachedElements?: ElementsMap;
   /** flag to reset all elements to their cached versions  */
   resetAll?: true;
   /** flag to reset all containers to their cached versions */
   resetContainers?: true;
 };
 
-export const actionChangeFontFamily = register({
+export const actionChangeFontFamily = register<{
+  currentItemFontFamily: any;
+  currentHoveredFontFamily: any;
+}>({
   name: "changeFontFamily",
   label: "labels.fontFamily",
   trackEvent: false,
@@ -796,22 +920,25 @@ export const actionChangeFontFamily = register({
           ...appState,
           ...nextAppState,
         },
-        storeAction: StoreAction.UPDATE,
+        captureUpdate: CaptureUpdateAction.NEVER,
       };
     }
 
+    invariant(value, "actionChangeFontFamily: value must be defined");
+
     const { currentItemFontFamily, currentHoveredFontFamily } = value;
 
-    let nexStoreAction: StoreActionType = StoreAction.NONE;
+    let nextCaptureUpdateAction: CaptureUpdateActionType =
+      CaptureUpdateAction.EVENTUALLY;
     let nextFontFamily: FontFamilyValues | undefined;
     let skipOnHoverRender = false;
 
     if (currentItemFontFamily) {
       nextFontFamily = currentItemFontFamily;
-      nexStoreAction = StoreAction.CAPTURE;
+      nextCaptureUpdateAction = CaptureUpdateAction.IMMEDIATELY;
     } else if (currentHoveredFontFamily) {
       nextFontFamily = currentHoveredFontFamily;
-      nexStoreAction = StoreAction.NONE;
+      nextCaptureUpdateAction = CaptureUpdateAction.EVENTUALLY;
 
       const selectedTextElements = getSelectedElements(elements, appState, {
         includeBoundTextElement: true,
@@ -844,7 +971,7 @@ export const actionChangeFontFamily = register({
         ...appState,
         ...nextAppState,
       },
-      storeAction: nexStoreAction,
+      captureUpdate: nextCaptureUpdateAction,
     };
 
     if (nextFontFamily && !skipOnHoverRender) {
@@ -896,7 +1023,7 @@ export const actionChangeFontFamily = register({
 
               if (resetContainers && container && cachedContainer) {
                 // reset the container back to it's cached version
-                mutateElement(container, { ...cachedContainer }, false);
+                app.scene.mutateElement(container, { ...cachedContainer });
               }
 
               if (!skipFontFaceCheck) {
@@ -927,12 +1054,7 @@ export const actionChangeFontFamily = register({
         // we either skip the check (have at least one font face loaded) or do the check and find out all the font faces have loaded
         for (const [element, container] of elementContainerMapping) {
           // trigger synchronous redraw
-          redrawTextBoundingBox(
-            element,
-            container,
-            app.scene.getNonDeletedElementsMap(),
-            false,
-          );
+          redrawTextBoundingBox(element, container, app.scene);
         }
       } else {
         // otherwise try to load all font faces for the given chars and redraw elements once our font faces loaded
@@ -949,8 +1071,7 @@ export const actionChangeFontFamily = register({
               redrawTextBoundingBox(
                 latestElement as ExcalidrawTextElement,
                 latestContainer,
-                app.scene.getNonDeletedElementsMap(),
-                false,
+                app.scene,
               );
             }
           }
@@ -964,20 +1085,21 @@ export const actionChangeFontFamily = register({
     return result;
   },
   PanelComponent: ({ elements, appState, app, updateData }) => {
-    const cachedElementsRef = useRef<Map<string, ExcalidrawElement>>(new Map());
+    const cachedElementsRef = useRef<ElementsMap>(new Map());
     const prevSelectedFontFamilyRef = useRef<number | null>(null);
     // relying on state batching as multiple `FontPicker` handlers could be called in rapid succession and we want to combine them
     const [batchedData, setBatchedData] = useState<ChangeFontFamilyData>({});
     const isUnmounted = useRef(true);
+    const { stylesPanelMode, isCompact } = getStylesPanelInfo(app);
 
     const selectedFontFamily = useMemo(() => {
       const getFontFamily = (
         elementsArray: readonly ExcalidrawElement[],
-        elementsMap: Map<string, ExcalidrawElement>,
+        elementsMap: ElementsMap,
       ) =>
         getFormValue(
           elementsArray,
-          appState,
+          app,
           (element) => {
             if (isTextElement(element)) {
               return element.fontFamily;
@@ -1015,7 +1137,7 @@ export const actionChangeFontFamily = register({
 
       // popup props are not in sync, hence we are in the middle of an update, so keeping the previous value we've had
       return prevSelectedFontFamilyRef.current;
-    }, [batchedData.openPopup, appState, elements, app.scene]);
+    }, [batchedData.openPopup, appState, elements, app]);
 
     useEffect(() => {
       prevSelectedFontFamilyRef.current = selectedFontFamily;
@@ -1040,21 +1162,29 @@ export const actionChangeFontFamily = register({
     }, []);
 
     return (
-      <fieldset>
-        <legend>{t("labels.fontFamily")}</legend>
+      <>
+        {stylesPanelMode === "full" && (
+          <legend>{t("labels.fontFamily")}</legend>
+        )}
         <FontPicker
           isOpened={appState.openPopup === "fontFamily"}
           selectedFontFamily={selectedFontFamily}
           hoveredFontFamily={appState.currentHoveredFontFamily}
+          compactMode={stylesPanelMode !== "full"}
           onSelect={(fontFamily) => {
-            setBatchedData({
-              openPopup: null,
-              currentHoveredFontFamily: null,
-              currentItemFontFamily: fontFamily,
-            });
-
-            // defensive clear so immediate close won't abuse the cached elements
-            cachedElementsRef.current.clear();
+            withCaretPositionPreservation(
+              () => {
+                setBatchedData({
+                  openPopup: null,
+                  currentHoveredFontFamily: null,
+                  currentItemFontFamily: fontFamily,
+                });
+                // defensive clear so immediate close won't abuse the cached elements
+                cachedElementsRef.current.clear();
+              },
+              isCompact,
+              !!appState.editingTextElement,
+            );
           }}
           onHover={(fontFamily) => {
             setBatchedData({
@@ -1111,34 +1241,34 @@ export const actionChangeFontFamily = register({
               }
 
               setBatchedData({
+                ...batchedData,
                 openPopup: "fontFamily",
               });
             } else {
-              // close, use the cache and clear it afterwards
-              const data = {
-                openPopup: null,
+              const fontFamilyData = {
                 currentHoveredFontFamily: null,
                 cachedElements: new Map(cachedElementsRef.current),
                 resetAll: true,
               } as ChangeFontFamilyData;
 
-              if (isUnmounted.current) {
-                // in case the component was unmounted by the parent, trigger the update directly
-                updateData({ ...batchedData, ...data });
-              } else {
-                setBatchedData(data);
-              }
-
+              setBatchedData({
+                ...fontFamilyData,
+              });
               cachedElementsRef.current.clear();
+
+              // Refocus text editor when font picker closes if we were editing text
+              if (isCompact && appState.editingTextElement) {
+                restoreCaretPosition(null); // Just refocus without saved position
+              }
             }
           }}
         />
-      </fieldset>
+      </>
     );
   },
 });
 
-export const actionChangeTextAlign = register({
+export const actionChangeTextAlign = register<TextAlign>({
   name: "changeTextAlign",
   label: "Change text alignment",
   trackEvent: false,
@@ -1156,7 +1286,7 @@ export const actionChangeTextAlign = register({
             redrawTextBoundingBox(
               newElement,
               app.scene.getContainerElement(oldElement),
-              app.scene.getNonDeletedElementsMap(),
+              app.scene,
             );
             return newElement;
           }
@@ -1169,66 +1299,77 @@ export const actionChangeTextAlign = register({
         ...appState,
         currentItemTextAlign: value,
       },
-      storeAction: StoreAction.CAPTURE,
+      captureUpdate: CaptureUpdateAction.IMMEDIATELY,
     };
   },
-  PanelComponent: ({ elements, appState, updateData, app }) => {
+  PanelComponent: ({ elements, appState, updateData, app, data }) => {
     const elementsMap = app.scene.getNonDeletedElementsMap();
+    const { isCompact } = getStylesPanelInfo(app);
+
     return (
       <fieldset>
         <legend>{t("labels.textAlign")}</legend>
-        <ButtonIconSelect<TextAlign | false>
-          group="text-align"
-          options={[
-            {
-              value: "left",
-              text: t("labels.left"),
-              icon: TextAlignLeftIcon,
-              testId: "align-left",
-            },
-            {
-              value: "center",
-              text: t("labels.center"),
-              icon: TextAlignCenterIcon,
-              testId: "align-horizontal-center",
-            },
-            {
-              value: "right",
-              text: t("labels.right"),
-              icon: TextAlignRightIcon,
-              testId: "align-right",
-            },
-          ]}
-          value={getFormValue(
-            elements,
-            appState,
-            (element) => {
-              if (isTextElement(element)) {
-                return element.textAlign;
-              }
-              const boundTextElement = getBoundTextElement(
-                element,
-                elementsMap,
+        <div className="buttonList">
+          <RadioSelection<TextAlign | false>
+            group="text-align"
+            options={[
+              {
+                value: "left",
+                text: t("labels.left"),
+                icon: TextAlignLeftIcon,
+                testId: "align-left",
+              },
+              {
+                value: "center",
+                text: t("labels.center"),
+                icon: TextAlignCenterIcon,
+                testId: "align-horizontal-center",
+              },
+              {
+                value: "right",
+                text: t("labels.right"),
+                icon: TextAlignRightIcon,
+                testId: "align-right",
+              },
+            ]}
+            value={getFormValue(
+              elements,
+              app,
+              (element) => {
+                if (isTextElement(element)) {
+                  return element.textAlign;
+                }
+                const boundTextElement = getBoundTextElement(
+                  element,
+                  elementsMap,
+                );
+                if (boundTextElement) {
+                  return boundTextElement.textAlign;
+                }
+                return null;
+              },
+              (element) =>
+                isTextElement(element) ||
+                getBoundTextElement(element, elementsMap) !== null,
+              (hasSelection) =>
+                hasSelection ? null : appState.currentItemTextAlign,
+            )}
+            onChange={(value) => {
+              withCaretPositionPreservation(
+                () => updateData(value),
+                isCompact,
+                !!appState.editingTextElement,
+                data?.onPreventClose,
               );
-              if (boundTextElement) {
-                return boundTextElement.textAlign;
-              }
-              return null;
-            },
-            (element) =>
-              isTextElement(element) ||
-              getBoundTextElement(element, elementsMap) !== null,
-            (hasSelection) =>
-              hasSelection ? null : appState.currentItemTextAlign,
-          )}
-          onChange={(value) => updateData(value)}
-        />
+            }}
+          />
+        </div>
       </fieldset>
     );
   },
 });
 
-export const actionChangeVerticalAlign = register({
+export const actionChangeVerticalAlign = register<VerticalAlign>({
   name: "changeVerticalAlign",
   label: "Change vertical alignment",
   trackEvent: { category: "element" },
@@ -1247,7 +1388,7 @@ export const actionChangeVerticalAlign = register({
             redrawTextBoundingBox(
               newElement,
               app.scene.getContainerElement(oldElement),
-              app.scene.getNonDeletedElementsMap(),
+              app.scene,
             );
             return newElement;
           }
@@ -1259,66 +1400,76 @@ export const actionChangeVerticalAlign = register({
       appState: {
         ...appState,
       },
-      storeAction: StoreAction.CAPTURE,
+      captureUpdate: CaptureUpdateAction.IMMEDIATELY,
     };
   },
-  PanelComponent: ({ elements, appState, updateData, app }) => {
+  PanelComponent: ({ elements, appState, updateData, app, data }) => {
+    const { isCompact } = getStylesPanelInfo(app);
     return (
       <fieldset>
-        <ButtonIconSelect<VerticalAlign | false>
-          group="text-align"
-          options={[
-            {
-              value: VERTICAL_ALIGN.TOP,
-              text: t("labels.alignTop"),
-              icon: <TextAlignTopIcon theme={appState.theme} />,
-              testId: "align-top",
-            },
-            {
-              value: VERTICAL_ALIGN.MIDDLE,
-              text: t("labels.centerVertically"),
-              icon: <TextAlignMiddleIcon theme={appState.theme} />,
-              testId: "align-middle",
-            },
-            {
-              value: VERTICAL_ALIGN.BOTTOM,
-              text: t("labels.alignBottom"),
-              icon: <TextAlignBottomIcon theme={appState.theme} />,
-              testId: "align-bottom",
-            },
-          ]}
-          value={getFormValue(
-            elements,
-            appState,
-            (element) => {
-              if (isTextElement(element) && element.containerId) {
-                return element.verticalAlign;
-              }
-              const boundTextElement = getBoundTextElement(
-                element,
-                app.scene.getNonDeletedElementsMap(),
+        <div className="buttonList">
+          <RadioSelection<VerticalAlign | false>
+            group="text-align"
+            options={[
+              {
+                value: VERTICAL_ALIGN.TOP,
+                text: t("labels.alignTop"),
+                icon: <TextAlignTopIcon theme={appState.theme} />,
+                testId: "align-top",
+              },
+              {
+                value: VERTICAL_ALIGN.MIDDLE,
+                text: t("labels.centerVertically"),
+                icon: <TextAlignMiddleIcon theme={appState.theme} />,
+                testId: "align-middle",
+              },
+              {
+                value: VERTICAL_ALIGN.BOTTOM,
+                text: t("labels.alignBottom"),
+                icon: <TextAlignBottomIcon theme={appState.theme} />,
+                testId: "align-bottom",
+              },
+            ]}
+            value={getFormValue(
+              elements,
+              app,
+              (element) => {
+                if (isTextElement(element) && element.containerId) {
+                  return element.verticalAlign;
+                }
+                const boundTextElement = getBoundTextElement(
+                  element,
+                  app.scene.getNonDeletedElementsMap(),
+                );
+                if (boundTextElement) {
+                  return boundTextElement.verticalAlign;
+                }
+                return null;
+              },
+              (element) =>
+                isTextElement(element) ||
+                getBoundTextElement(
+                  element,
+                  app.scene.getNonDeletedElementsMap(),
+                ) !== null,
+              (hasSelection) => (hasSelection ? null : VERTICAL_ALIGN.MIDDLE),
+            )}
+            onChange={(value) => {
+              withCaretPositionPreservation(
+                () => updateData(value),
+                isCompact,
+                !!appState.editingTextElement,
+                data?.onPreventClose,
               );
-              if (boundTextElement) {
-                return boundTextElement.verticalAlign;
-              }
-              return null;
-            },
-            (element) =>
-              isTextElement(element) ||
-              getBoundTextElement(
-                element,
-                app.scene.getNonDeletedElementsMap(),
-              ) !== null,
-            (hasSelection) => (hasSelection ? null : VERTICAL_ALIGN.MIDDLE),
-          )}
-          onChange={(value) => updateData(value)}
-        />
+            }}
+          />
+        </div>
       </fieldset>
     );
   },
 });
 
-export const actionChangeRoundness = register({
+export const actionChangeRoundness = register<"sharp" | "round">({
   name: "changeRoundness",
   label: "Change edge roundness",
   trackEvent: false,
@@ -1344,10 +1495,10 @@ export const actionChangeRoundness = register({
         ...appState,
         currentItemRoundness: value,
       },
-      storeAction: StoreAction.CAPTURE,
+      captureUpdate: CaptureUpdateAction.IMMEDIATELY,
     };
   },
-  PanelComponent: ({ elements, appState, updateData }) => {
+  PanelComponent: ({ elements, appState, updateData, app, renderAction }) => {
     const targetElements = getTargetElements(
       getNonDeletedElements(elements),
       appState,
@@ -1360,32 +1511,39 @@ export const actionChangeRoundness = register({
     return (
       <fieldset>
         <legend>{t("labels.edges")}</legend>
-        <ButtonIconSelect
-          group="edges"
-          options={[
-            {
-              value: "sharp",
-              text: t("labels.sharp"),
-              icon: EdgeSharpIcon,
-            },
-            {
-              value: "round",
-              text: t("labels.round"),
-              icon: EdgeRoundIcon,
-            },
-          ]}
-          value={getFormValue(
-            elements,
-            appState,
-            (element) =>
-              hasLegacyRoundness ? null : element.roundness ? "round" : "sharp",
-            (element) =>
-              !isArrowElement(element) && element.hasOwnProperty("roundness"),
-            (hasSelection) =>
-              hasSelection ? null : appState.currentItemRoundness,
-          )}
-          onChange={(value) => updateData(value)}
-        />
+        <div className="buttonList">
+          <RadioSelection
+            group="edges"
+            options={[
+              {
+                value: "sharp",
+                text: t("labels.sharp"),
+                icon: EdgeSharpIcon,
+              },
+              {
+                value: "round",
+                text: t("labels.round"),
+                icon: EdgeRoundIcon,
+              },
+            ]}
+            value={getFormValue(
+              elements,
+              app,
+              (element) =>
+                hasLegacyRoundness
+                  ? null
+                  : element.roundness
+                  ? "round"
+                  : "sharp",
+              (element) =>
+                !isArrowElement(element) && element.hasOwnProperty("roundness"),
+              (hasSelection) =>
+                hasSelection ? null : appState.currentItemRoundness,
+            )}
+            onChange={(value) => updateData(value)}
+          />
+          {renderAction("togglePolygon")}
+        </div>
       </fieldset>
     );
   },
@@ -1397,7 +1555,7 @@ const getArrowheadOptions = (flip: boolean) => {
       value: null,
       text: t("labels.arrowhead_none"),
       keyBinding: "q",
-      icon: ArrowheadNoneIcon,
+      icon: <ArrowheadNoneIcon flip={flip} />,
     },
     {
       value: "arrow",
@@ -1406,71 +1564,78 @@ const getArrowheadOptions = (flip: boolean) => {
       icon: <ArrowheadArrowIcon flip={flip} />,
     },
     {
-      value: "bar",
-      text: t("labels.arrowhead_bar"),
-      keyBinding: "e",
-      icon: <ArrowheadBarIcon flip={flip} />,
-    },
-    {
-      value: "dot",
-      text: t("labels.arrowhead_circle"),
-      keyBinding: null,
-      icon: <ArrowheadCircleIcon flip={flip} />,
-      showInPicker: false,
-    },
-    {
-      value: "circle",
-      text: t("labels.arrowhead_circle"),
-      keyBinding: "r",
-      icon: <ArrowheadCircleIcon flip={flip} />,
-      showInPicker: false,
-    },
-    {
-      value: "circle_outline",
-      text: t("labels.arrowhead_circle_outline"),
-      keyBinding: null,
-      icon: <ArrowheadCircleOutlineIcon flip={flip} />,
-      showInPicker: false,
-    },
-    {
       value: "triangle",
       text: t("labels.arrowhead_triangle"),
       icon: <ArrowheadTriangleIcon flip={flip} />,
-      keyBinding: "t",
+      keyBinding: "e",
     },
     {
       value: "triangle_outline",
       text: t("labels.arrowhead_triangle_outline"),
       icon: <ArrowheadTriangleOutlineIcon flip={flip} />,
-      keyBinding: null,
-      showInPicker: false,
+      keyBinding: "r",
+    },
+    {
+      value: "circle",
+      text: t("labels.arrowhead_circle"),
+      keyBinding: "a",
+      icon: <ArrowheadCircleIcon flip={flip} />,
+    },
+    {
+      value: "circle_outline",
+      text: t("labels.arrowhead_circle_outline"),
+      keyBinding: "s",
+      icon: <ArrowheadCircleOutlineIcon flip={flip} />,
     },
     {
       value: "diamond",
       text: t("labels.arrowhead_diamond"),
       icon: <ArrowheadDiamondIcon flip={flip} />,
-      keyBinding: null,
-      showInPicker: false,
+      keyBinding: "d",
     },
     {
       value: "diamond_outline",
       text: t("labels.arrowhead_diamond_outline"),
       icon: <ArrowheadDiamondOutlineIcon flip={flip} />,
-      keyBinding: null,
-      showInPicker: false,
+      keyBinding: "f",
+    },
+    {
+      value: "bar",
+      text: t("labels.arrowhead_bar"),
+      keyBinding: "z",
+      icon: <ArrowheadBarIcon flip={flip} />,
+    },
+    {
+      value: "crowfoot_one",
+      text: t("labels.arrowhead_crowfoot_one"),
+      icon: <ArrowheadCrowfootOneIcon flip={flip} />,
+      keyBinding: "x",
+    },
+    {
+      value: "crowfoot_many",
+      text: t("labels.arrowhead_crowfoot_many"),
+      icon: <ArrowheadCrowfootIcon flip={flip} />,
+      keyBinding: "c",
+    },
+    {
+      value: "crowfoot_one_or_many",
+      text: t("labels.arrowhead_crowfoot_one_or_many"),
+      icon: <ArrowheadCrowfootOneOrManyIcon flip={flip} />,
+      keyBinding: "v",
     },
   ] as const;
 };
 
-export const actionChangeArrowhead = register({
+export const actionChangeArrowhead = register<{
+  position: "start" | "end";
+  type: Arrowhead;
+}>({
   name: "changeArrowhead",
   label: "Change arrowheads",
   trackEvent: false,
-  perform: (
-    elements,
-    appState,
-    value: { position: "start" | "end"; type: Arrowhead },
-  ) => {
+  perform: (elements, appState, value) => {
+    invariant(value, "actionChangeArrowhead: value must be defined");
+
     return {
       elements: changeProperty(elements, appState, (el) => {
         if (isLinearElement(el)) {
@@ -1497,10 +1662,10 @@ export const actionChangeArrowhead = register({
           ? "currentItemStartArrowhead"
           : "currentItemEndArrowhead"]: value.type,
       },
-      storeAction: StoreAction.CAPTURE,
+      captureUpdate: CaptureUpdateAction.IMMEDIATELY,
     };
   },
-  PanelComponent: ({ elements, appState, updateData }) => {
+  PanelComponent: ({ elements, appState, updateData, app }) => {
     const isRTL = getLanguage().rtl;
 
     return (
@@ -1512,15 +1677,17 @@ export const actionChangeArrowhead = register({
             options={getArrowheadOptions(!isRTL)}
             value={getFormValue<Arrowhead | null>(
               elements,
-              appState,
+              app,
               (element) =>
                 isLinearElement(element) && canHaveArrowheads(element.type)
                   ? element.startArrowhead
                   : appState.currentItemStartArrowhead,
               true,
-              appState.currentItemStartArrowhead,
+              (hasSelection) =>
+                hasSelection ? null : appState.currentItemStartArrowhead,
             )}
             onChange={(value) => updateData({ position: "start", type: value })}
+            numberOfOptionsToAlwaysShow={4}
           />
           <IconPicker
             label="arrowhead_end"
@@ -1528,15 +1695,17 @@ export const actionChangeArrowhead = register({
             options={getArrowheadOptions(!!isRTL)}
             value={getFormValue<Arrowhead | null>(
               elements,
-              appState,
+              app,
               (element) =>
                 isLinearElement(element) && canHaveArrowheads(element.type)
                   ? element.endArrowhead
                   : appState.currentItemEndArrowhead,
               true,
-              appState.currentItemEndArrowhead,
+              (hasSelection) =>
+                hasSelection ? null : appState.currentItemEndArrowhead,
             )}
             onChange={(value) => updateData({ position: "end", type: value })}
+            numberOfOptionsToAlwaysShow={4}
           />
         </div>
       </fieldset>
@@ -1544,204 +1713,263 @@ export const actionChangeArrowhead = register({
   },
 });
 
-export const actionChangeArrowType = register({
+export const actionChangeArrowProperties = register({
+  name: "changeArrowProperties",
+  label: "Change arrow properties",
+  trackEvent: false,
+  perform: (elements, appState, value, app) => {
+    // This action doesn't perform any changes directly
+    // It's just a container for the arrow type and arrowhead actions
+    return false;
+  },
+  PanelComponent: ({ elements, appState, updateData, app, renderAction }) => {
+    return (
+      <div className="selected-shape-actions">
+        {renderAction("changeArrowhead")}
+        {renderAction("changeArrowType")}
+      </div>
+    );
+  },
+});
+
+export const actionChangeArrowType = register<keyof typeof ARROW_TYPE>({
   name: "changeArrowType",
   label: "Change arrow types",
   trackEvent: false,
   perform: (elements, appState, value, app) => {
-    return {
-      elements: changeProperty(elements, appState, (el) => {
-        if (!isArrowElement(el)) {
-          return el;
-        }
-        const newElement = newElementWith(el, {
-          roundness:
-            value === ARROW_TYPE.round
-              ? {
-                  type: ROUNDNESS.PROPORTIONAL_RADIUS,
-                }
-              : null,
-          elbowed: value === ARROW_TYPE.elbow,
-          points:
-            value === ARROW_TYPE.elbow || el.elbowed
-              ? [el.points[0], el.points[el.points.length - 1]]
-              : el.points,
-        });
+    const newElements = changeProperty(elements, appState, (el) => {
+      if (!isArrowElement(el)) {
+        return el;
+      }
+      const elementsMap = app.scene.getNonDeletedElementsMap();
+      const startPoint = LinearElementEditor.getPointAtIndexGlobalCoordinates(
+        el,
+        0,
+        elementsMap,
+      );
+      const endPoint = LinearElementEditor.getPointAtIndexGlobalCoordinates(
+        el,
+        -1,
+        elementsMap,
+      );
+      let newElement = newElementWith(el, {
+        x: value === ARROW_TYPE.elbow ? startPoint[0] : el.x,
+        y: value === ARROW_TYPE.elbow ? startPoint[1] : el.y,
+        roundness:
+          value === ARROW_TYPE.round
+            ? {
+                type: ROUNDNESS.PROPORTIONAL_RADIUS,
+              }
+            : null,
+        elbowed: value === ARROW_TYPE.elbow,
+        angle: value === ARROW_TYPE.elbow ? (0 as Radians) : el.angle,
+        points:
+          value === ARROW_TYPE.elbow || el.elbowed
+            ? [
+                LinearElementEditor.pointFromAbsoluteCoords(
+                  {
+                    ...el,
+                    x: startPoint[0],
+                    y: startPoint[1],
+                    angle: 0 as Radians,
+                  },
+                  startPoint,
+                  elementsMap,
+                ),
+                LinearElementEditor.pointFromAbsoluteCoords(
+                  {
+                    ...el,
+                    x: startPoint[0],
+                    y: startPoint[1],
+                    angle: 0 as Radians,
+                  },
+                  endPoint,
+                  elementsMap,
+                ),
+              ]
+            : el.points,
+      });
 
-        if (isElbowArrow(newElement)) {
-          const elementsMap = app.scene.getNonDeletedElementsMap();
+      if (isElbowArrow(newElement)) {
+        newElement.fixedSegments = null;
 
-          app.dismissLinearEditor();
+        const elementsMap = app.scene.getNonDeletedElementsMap();
 
-          const startGlobalPoint =
-            LinearElementEditor.getPointAtIndexGlobalCoordinates(
-              newElement,
-              0,
-              elementsMap,
-            );
-          const endGlobalPoint =
-            LinearElementEditor.getPointAtIndexGlobalCoordinates(
-              newElement,
-              -1,
-              elementsMap,
-            );
-          const startHoveredElement =
-            !newElement.startBinding &&
-            getHoveredElementForBinding(
-              tupleToCoors(startGlobalPoint),
-              elements,
-              elementsMap,
-              true,
-            );
-          const endHoveredElement =
-            !newElement.endBinding &&
-            getHoveredElementForBinding(
-              tupleToCoors(endGlobalPoint),
-              elements,
-              elementsMap,
-              true,
-            );
-          const startElement = startHoveredElement
-            ? startHoveredElement
-            : newElement.startBinding &&
-              (elementsMap.get(
-                newElement.startBinding.elementId,
-              ) as ExcalidrawBindableElement);
-          const endElement = endHoveredElement
-            ? endHoveredElement
-            : newElement.endBinding &&
-              (elementsMap.get(
-                newElement.endBinding.elementId,
-              ) as ExcalidrawBindableElement);
+        app.dismissLinearEditor();
 
-          const finalStartPoint = startHoveredElement
-            ? bindPointToSnapToElementOutline(
-                startGlobalPoint,
-                endGlobalPoint,
-                startHoveredElement,
-                elementsMap,
-              )
-            : startGlobalPoint;
-          const finalEndPoint = endHoveredElement
-            ? bindPointToSnapToElementOutline(
-                endGlobalPoint,
-                startGlobalPoint,
-                endHoveredElement,
-                elementsMap,
-              )
-            : endGlobalPoint;
-
-          startHoveredElement &&
-            bindLinearElement(
-              newElement,
-              startHoveredElement,
-              "start",
-              elementsMap,
-            );
-          endHoveredElement &&
-            bindLinearElement(
-              newElement,
-              endHoveredElement,
-              "end",
-              elementsMap,
-            );
-
-          mutateElbowArrow(
+        const startGlobalPoint =
+          LinearElementEditor.getPointAtIndexGlobalCoordinates(
             newElement,
+            0,
             elementsMap,
-            [finalStartPoint, finalEndPoint].map(
+          );
+        const endGlobalPoint =
+          LinearElementEditor.getPointAtIndexGlobalCoordinates(
+            newElement,
+            -1,
+            elementsMap,
+          );
+        const startElement =
+          newElement.startBinding &&
+          (elementsMap.get(
+            newElement.startBinding.elementId,
+          ) as ExcalidrawBindableElement);
+        const endElement =
+          newElement.endBinding &&
+          (elementsMap.get(
+            newElement.endBinding.elementId,
+          ) as ExcalidrawBindableElement);
+
+        const startBinding =
+          startElement && newElement.startBinding
+            ? {
+                // @ts-ignore TS cannot discern check above
+                ...newElement.startBinding!,
+                ...calculateFixedPointForElbowArrowBinding(
+                  newElement,
+                  startElement,
+                  "start",
+                  elementsMap,
+                  appState.isBindingEnabled,
+                ),
+              }
+            : null;
+        const endBinding =
+          endElement && newElement.endBinding
+            ? {
+                // @ts-ignore TS cannot discern check above
+                ...newElement.endBinding,
+                ...calculateFixedPointForElbowArrowBinding(
+                  newElement,
+                  endElement,
+                  "end",
+                  elementsMap,
+                  appState.isBindingEnabled,
+                ),
+              }
+            : null;
+
+        newElement = {
+          ...newElement,
+          startBinding,
+          endBinding,
+          ...updateElbowArrowPoints(newElement, elementsMap, {
+            points: [startGlobalPoint, endGlobalPoint].map(
               (p): LocalPoint =>
                 pointFrom(p[0] - newElement.x, p[1] - newElement.y),
             ),
-            vector(0, 0),
-            {
-              ...(startElement && newElement.startBinding
-                ? {
-                    startBinding: {
-                      // @ts-ignore TS cannot discern check above
-                      ...newElement.startBinding!,
-                      ...calculateFixedPointForElbowArrowBinding(
-                        newElement,
-                        startElement,
-                        "start",
-                        elementsMap,
-                      ),
-                    },
-                  }
-                : {}),
-              ...(endElement && newElement.endBinding
-                ? {
-                    endBinding: {
-                      // @ts-ignore TS cannot discern check above
-                      ...newElement.endBinding,
-                      ...calculateFixedPointForElbowArrowBinding(
-                        newElement,
-                        endElement,
-                        "end",
-                        elementsMap,
-                      ),
-                    },
-                  }
-                : {}),
-            },
-          );
+            startBinding,
+            endBinding,
+            fixedSegments: null,
+          }),
+        };
+      } else {
+        const elementsMap = app.scene.getNonDeletedElementsMap();
+        if (newElement.startBinding) {
+          const startElement = elementsMap.get(
+            newElement.startBinding.elementId,
+          ) as ExcalidrawBindableElement;
+          if (startElement) {
+            bindBindingElement(
+              newElement,
+              startElement,
+              appState.bindMode === "inside" ? "inside" : "orbit",
+              "start",
+              app.scene,
+            );
+          }
         }
+        if (newElement.endBinding) {
+          const endElement = elementsMap.get(
+            newElement.endBinding.elementId,
+          ) as ExcalidrawBindableElement;
+          if (endElement) {
+            bindBindingElement(
+              newElement,
+              endElement,
+              appState.bindMode === "inside" ? "inside" : "orbit",
+              "end",
+              app.scene,
+            );
+          }
+        }
+      }
 
-        return newElement;
-      }),
-      appState: {
-        ...appState,
-        currentItemArrowType: value,
-      },
-      storeAction: StoreAction.CAPTURE,
+      return newElement;
+    });
+
+    const newState = {
+      ...appState,
+      currentItemArrowType: value,
+    };
+
+    // Change the arrow type and update any other state settings for
+    // the arrow.
+    const selectedId = appState.selectedLinearElement?.elementId;
+    if (selectedId) {
+      const selected = newElements.find((el) => el.id === selectedId);
+      if (selected) {
+        newState.selectedLinearElement = new LinearElementEditor(
+          selected as ExcalidrawLinearElement,
+          arrayToMap(elements),
+        );
+      }
+    }
+
+    return {
+      elements: newElements,
+      appState: newState,
+      captureUpdate: CaptureUpdateAction.IMMEDIATELY,
     };
   },
-  PanelComponent: ({ elements, appState, updateData }) => {
+  PanelComponent: ({ elements, appState, updateData, app }) => {
     return (
       <fieldset>
         <legend>{t("labels.arrowtypes")}</legend>
-        <ButtonIconSelect
-          group="arrowtypes"
-          options={[
-            {
-              value: ARROW_TYPE.sharp,
-              text: t("labels.arrowtype_sharp"),
-              icon: sharpArrowIcon,
-              testId: "sharp-arrow",
-            },
-            {
-              value: ARROW_TYPE.round,
-              text: t("labels.arrowtype_round"),
-              icon: roundArrowIcon,
-              testId: "round-arrow",
-            },
-            {
-              value: ARROW_TYPE.elbow,
-              text: t("labels.arrowtype_elbowed"),
-              icon: elbowArrowIcon,
-              testId: "elbow-arrow",
-            },
-          ]}
-          value={getFormValue(
-            elements,
-            appState,
-            (element) => {
-              if (isArrowElement(element)) {
-                return element.elbowed
-                  ? ARROW_TYPE.elbow
-                  : element.roundness
-                  ? ARROW_TYPE.round
-                  : ARROW_TYPE.sharp;
-              }
+        <div className="buttonList">
+          <RadioSelection
+            group="arrowtypes"
+            options={[
+              {
+                value: ARROW_TYPE.sharp,
+                text: t("labels.arrowtype_sharp"),
+                icon: sharpArrowIcon,
+                testId: "sharp-arrow",
+              },
+              {
+                value: ARROW_TYPE.round,
+                text: t("labels.arrowtype_round"),
+                icon: roundArrowIcon,
+                testId: "round-arrow",
+              },
+              {
+                value: ARROW_TYPE.elbow,
+                text: t("labels.arrowtype_elbowed"),
+                icon: elbowArrowIcon,
+                testId: "elbow-arrow",
+              },
+            ]}
+            value={getFormValue(
+              elements,
+              app,
+              (element) => {
+                if (isArrowElement(element)) {
+                  return element.elbowed
+                    ? ARROW_TYPE.elbow
+                    : element.roundness
+                    ? ARROW_TYPE.round
+                    : ARROW_TYPE.sharp;
+                }
 
-              return null;
-            },
-            (element) => isArrowElement(element),
-            (hasSelection) =>
-              hasSelection ? null : appState.currentItemArrowType,
-          )}
-          onChange={(value) => updateData(value)}
-        />
+                return null;
+              },
+              (element) => isArrowElement(element),
+              (hasSelection) =>
+                hasSelection ? null : appState.currentItemArrowType,
+            )}
+            onChange={(value) => updateData(value)}
+          />
+        </div>
       </fieldset>
     );
   },

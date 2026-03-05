@@ -1,8 +1,10 @@
-import type React from "react";
 import type {
   ExcalidrawElement,
   OrderedExcalidrawElement,
-} from "../element/types";
+} from "@excalidraw/element/types";
+
+import type { CaptureUpdateActionType } from "@excalidraw/element";
+
 import type {
   AppClassProperties,
   AppState,
@@ -10,7 +12,7 @@ import type {
   BinaryFiles,
   UIAppState,
 } from "../types";
-import type { StoreActionType } from "../store";
+import type React from "react";
 
 export type ActionSource =
   | "ui"
@@ -25,15 +27,15 @@ export type ActionResult =
       elements?: readonly ExcalidrawElement[] | null;
       appState?: Partial<AppState> | null;
       files?: BinaryFiles | null;
-      storeAction: StoreActionType;
+      captureUpdate: CaptureUpdateActionType;
       replaceFiles?: boolean;
     }
   | false;
 
-type ActionFn = (
+type ActionFn<TData = any> = (
   elements: readonly OrderedExcalidrawElement[],
   appState: Readonly<AppState>,
-  formData: any,
+  formData: TData | undefined,
   app: AppClassProperties,
 ) => ActionResult | Promise<ActionResult>;
 
@@ -57,6 +59,8 @@ export type ActionName =
   | "gridMode"
   | "zenMode"
   | "objectsSnapMode"
+  | "arrowBinding"
+  | "midpointSnapping"
   | "stats"
   | "changeStrokeColor"
   | "changeBackgroundColor"
@@ -67,10 +71,9 @@ export type ActionName =
   | "changeStrokeStyle"
   | "changeArrowhead"
   | "changeArrowType"
+  | "changeArrowProperties"
   | "changeOpacity"
   | "changeFontSize"
-  | "toggleCanvasMenu"
-  | "toggleEditMenu"
   | "undo"
   | "redo"
   | "finalize"
@@ -137,7 +140,11 @@ export type ActionName =
   | "searchMenu"
   | "copyElementLink"
   | "linkToElement"
-  | "cropEditor";
+  | "cropEditor"
+  | "wrapSelectionInFrame"
+  | "toggleLassoTool"
+  | "toggleShapeSwitch"
+  | "togglePolygon";
 
 export type PanelComponentProps = {
   elements: readonly ExcalidrawElement[];
@@ -146,9 +153,13 @@ export type PanelComponentProps = {
   appProps: ExcalidrawProps;
   data?: Record<string, any>;
   app: AppClassProperties;
+  renderAction: (
+    name: ActionName,
+    data?: PanelComponentProps["data"],
+  ) => React.JSX.Element | null;
 };
 
-export interface Action {
+export interface Action<TData = any> {
   name: ActionName;
   label:
     | string
@@ -165,7 +176,7 @@ export interface Action {
         elements: readonly ExcalidrawElement[],
       ) => React.ReactNode);
   PanelComponent?: React.FC<PanelComponentProps>;
-  perform: ActionFn;
+  perform: ActionFn<TData>;
   keyPriority?: number;
   keyTest?: (
     event: React.KeyboardEvent | KeyboardEvent,
@@ -192,7 +203,8 @@ export interface Action {
           | "menu"
           | "collab"
           | "hyperlink"
-          | "search_menu";
+          | "search_menu"
+          | "shape_switch";
         action?: string;
         predicate?: (
           appState: Readonly<AppState>,

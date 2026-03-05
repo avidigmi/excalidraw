@@ -1,3 +1,4 @@
+import path from "path";
 import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import svgrPlugin from "vite-plugin-svgr";
@@ -7,7 +8,6 @@ import checker from "vite-plugin-checker";
 import { createHtmlPlugin } from "vite-plugin-html";
 import Sitemap from "vite-plugin-sitemap";
 import { woff2BrowserPlugin } from "../scripts/woff2/woff2-vite-plugins";
-
 export default defineConfig(({ mode }) => {
   // To load .env variables
   const envVars = loadEnv(mode, `../`);
@@ -21,6 +21,62 @@ export default defineConfig(({ mode }) => {
     // We need to specify the envDir since now there are no
     //more located in parallel with the vite.config.ts file but in parent dir
     envDir: "../",
+    resolve: {
+      alias: [
+        {
+          find: /^@excalidraw\/common$/,
+          replacement: path.resolve(
+            __dirname,
+            "../packages/common/src/index.ts",
+          ),
+        },
+        {
+          find: /^@excalidraw\/common\/(.*?)/,
+          replacement: path.resolve(__dirname, "../packages/common/src/$1"),
+        },
+        {
+          find: /^@excalidraw\/element$/,
+          replacement: path.resolve(
+            __dirname,
+            "../packages/element/src/index.ts",
+          ),
+        },
+        {
+          find: /^@excalidraw\/element\/(.*?)/,
+          replacement: path.resolve(__dirname, "../packages/element/src/$1"),
+        },
+        {
+          find: /^@excalidraw\/excalidraw$/,
+          replacement: path.resolve(
+            __dirname,
+            "../packages/excalidraw/index.tsx",
+          ),
+        },
+        {
+          find: /^@excalidraw\/excalidraw\/(.*?)/,
+          replacement: path.resolve(__dirname, "../packages/excalidraw/$1"),
+        },
+        {
+          find: /^@excalidraw\/math$/,
+          replacement: path.resolve(__dirname, "../packages/math/src/index.ts"),
+        },
+        {
+          find: /^@excalidraw\/math\/(.*?)/,
+          replacement: path.resolve(__dirname, "../packages/math/src/$1"),
+        },
+        {
+          find: /^@excalidraw\/utils$/,
+          replacement: path.resolve(
+            __dirname,
+            "../packages/utils/src/index.ts",
+          ),
+        },
+        {
+          find: /^@excalidraw\/utils\/(.*?)/,
+          replacement: path.resolve(__dirname, "../packages/utils/src/$1"),
+        },
+      ],
+    },
     build: {
       outDir: "build",
       rollupOptions: {
@@ -45,6 +101,10 @@ export default defineConfig(({ mode }) => {
               const index = id.indexOf("locales/");
               // Taking the substring after "locales/"
               return `locales/${id.substring(index + 8)}`;
+            }
+
+            if (id.includes("@excalidraw/mermaid-to-excalidraw")) {
+              return "mermaid-to-excalidraw";
             }
           },
         },
@@ -140,6 +200,7 @@ export default defineConfig(({ mode }) => {
               },
             },
           ],
+          maximumFileSizeToCacheInBytes: 2.3 * 1024 ** 2, // 2.3MB
         },
         manifest: {
           short_name: "Excalidraw",
@@ -169,7 +230,7 @@ export default defineConfig(({ mode }) => {
             },
           ],
           start_url: "/",
-          id:"excalidraw",
+          id: "excalidraw",
           display: "standalone",
           theme_color: "#121212",
           background_color: "#ffffff",

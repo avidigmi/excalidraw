@@ -1,8 +1,9 @@
-import React from "react";
+import { pointFrom } from "@excalidraw/math";
+
 import { Excalidraw } from "../index";
-import { render } from "../tests/test-utils";
 import { API } from "../tests/helpers/api";
-import { pointFrom } from "../../math";
+import { render } from "../tests/test-utils";
+
 import { actionFlipHorizontal, actionFlipVertical } from "./actionFlip";
 
 const { h } = window;
@@ -37,24 +38,23 @@ describe("flipping re-centers selection", () => {
         height: 239.9,
         startBinding: {
           elementId: "rec1",
-          focus: 0,
-          gap: 5,
           fixedPoint: [0.49, -0.05],
+          mode: "orbit",
         },
         endBinding: {
           elementId: "rec2",
-          focus: 0,
-          gap: 5,
           fixedPoint: [-0.05, 0.49],
+          mode: "orbit",
         },
         startArrowhead: null,
         endArrowhead: "arrow",
+        fixedSegments: null,
         points: [
           pointFrom(0, 0),
           pointFrom(0, -35),
-          pointFrom(-90.9, -35),
-          pointFrom(-90.9, 204.9),
-          pointFrom(65.1, 204.9),
+          pointFrom(-90, -35),
+          pointFrom(-90, 204),
+          pointFrom(66, 204),
         ],
         elbowed: true,
       }),
@@ -70,13 +70,13 @@ describe("flipping re-centers selection", () => {
     API.executeAction(actionFlipHorizontal);
     API.executeAction(actionFlipHorizontal);
 
-    const rec1 = h.elements.find((el) => el.id === "rec1");
-    expect(rec1?.x).toBeCloseTo(100);
-    expect(rec1?.y).toBeCloseTo(100);
+    const rec1 = h.elements.find((el) => el.id === "rec1")!;
+    expect(rec1.x).toBeCloseTo(100, 0);
+    expect(rec1.y).toBeCloseTo(101, 0);
 
-    const rec2 = h.elements.find((el) => el.id === "rec2");
-    expect(rec2?.x).toBeCloseTo(220);
-    expect(rec2?.y).toBeCloseTo(250);
+    const rec2 = h.elements.find((el) => el.id === "rec2")!;
+    expect(rec2.x).toBeCloseTo(220, 0);
+    expect(rec2.y).toBeCloseTo(251, 0);
   });
 });
 
@@ -97,8 +97,8 @@ describe("flipping arrowheads", () => {
       endArrowhead: null,
       endBinding: {
         elementId: rect.id,
-        focus: 0.5,
-        gap: 5,
+        fixedPoint: [0.5, 0.5],
+        mode: "orbit",
       },
     });
 
@@ -137,13 +137,13 @@ describe("flipping arrowheads", () => {
       endArrowhead: "circle",
       startBinding: {
         elementId: rect.id,
-        focus: 0.5,
-        gap: 5,
+        fixedPoint: [0.5, 0.5],
+        mode: "orbit",
       },
       endBinding: {
         elementId: rect2.id,
-        focus: 0.5,
-        gap: 5,
+        fixedPoint: [0.5, 0.5],
+        mode: "orbit",
       },
     });
 
@@ -193,8 +193,8 @@ describe("flipping arrowheads", () => {
       endArrowhead: null,
       endBinding: {
         elementId: rect.id,
-        focus: 0.5,
-        gap: 5,
+        fixedPoint: [0.5, 0.5],
+        mode: "orbit",
       },
     });
 
